@@ -1,8 +1,12 @@
+https://man7.org/linux/man-pages/man2/ptrace.2.html
+
 To be traced by its parent: PTRACE_TRACEME
 Attach to process: PTRACE_ATTACH or PTRACE_SEIZE
 Retrive info about the signal that caused the stop: PTRACE_GETSIGINFO or PTRACE_PEEKSIGINFO or PTRACE_GET_SYSCALL_INFO (if linux >= 5.3)
+Get the value stored in registers for the traced process: PTRACE_GETREGS
 Set ptrace options: PTRACE_SETOPTIONS
 Message about the ptrace event: PTRACE_GETEVENTMSG
+PTRACE_PEEKDATA, PTRACE_PEEKTEXT, PTRACE_PEEKUSR
 Restart the stopped process: PTRACE_CONT or PTRACE_SYSCALL or PTARCE_SINGLESTEP
 Kill tracee: PTRACE_KILL or PTRACE_INTERRUPT
 Detach from tracee & restart it: PTRACE_DETACH

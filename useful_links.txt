@@ -1,0 +1,20 @@
+Sys calls 32 bits
+https://chromium.googlesource.com/chromiumos/docs/+/HEAD/constants/syscalls.md#x86-32_bit
+or http://asm.sourceforge.net/syscall.html
+
+ELF:
+https://refspecs.linuxfoundation.org/elf/elf.pdf
+
+x86 assembly:
+https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+https://www.felixcloutier.com/x86/
+https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf
+
+OPCODES RET & CALL:
+https://www.felixcloutier.com/x86/ret
+https://www.felixcloutier.com/x86/call
+http://ref.x86asm.net/coder32.html
+https://en.wikipedia.org/wiki/X86_instruction_listings
+http://www.c-jump.com/CIS77/CPU/x86/lecture.html
+https://c9x.me/x86/html/file_module_x86_id_280.html
+https://c9x.me/x86/html/file_module_x86_id_26.html
