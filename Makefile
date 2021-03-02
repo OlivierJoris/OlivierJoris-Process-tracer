@@ -4,7 +4,8 @@ PROGRAM=tracer
 # DO NOT MODIFY CC, CFLAGS and PROGRAM
 # COMPLETE BELOW
 
-OBJECTS=tracee.o
+SOURCES=$(wildcard *.c)
+OBJECTS=$(SOURCES:.c=.o)
 
 all: $(PROGRAM)
 
