@@ -10,8 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/user.h>
 
 struct Profiler_t {
     char* tracee;
@@ -35,17 +38,33 @@ Profiler* run_profiler(char* tracee){
 
     printf("Tracee path = %s\n", profiler->tracee);
 
-    pid_t child_pid = fork();
-    if(child_pid < 0){
+    pid_t childPID = fork();
+    if(childPID < 0){
         fprintf(stderr, "Failed forking process!\n");
         profiler_clean(profiler);
         return NULL;
-    }else if(child_pid == 0){
+    }else if(childPID == 0){
+        // Allow parent to trace this process.
+        ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         char* argv[] = {NULL};
         char* env[] = {NULL};
         execve(profiler->tracee, argv, env);
     }else{
-        wait(NULL);
+        int status;
+        struct user_regs_struct userRegs;
+        while(true){
+            wait(&status);
+            if(WIFEXITED(status))
+                break;
+            // Get registers
+            ptrace(PTRACE_GETREGS, childPID, NULL, &userRegs);
+            // EIP = 32 bits instruction register
+            printf("Regiser eip content = %lx | ", userRegs.eip);
+            // Get opcode
+            long opcode = ptrace(PTRACE_PEEKTEXT, childPID, userRegs.eip, NULL);
+            printf("opcode = %lx\n", opcode);
+            ptrace(PTRACE_SINGLESTEP, childPID, 0, 0);
+        }
         printf("Tracee finished\n");
     }
 
