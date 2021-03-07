@@ -59,10 +59,10 @@ Profiler* run_profiler(char* tracee){
             // Get registers
             ptrace(PTRACE_GETREGS, childPID, NULL, &userRegs);
             // EIP = 32 bits instruction register
-            printf("Regiser eip content = %lx | ", userRegs.eip);
+            //printf("Regiser eip content = %lx | ", userRegs.eip);
             // Get opcode
             long opcode = ptrace(PTRACE_PEEKTEXT, childPID, userRegs.eip, NULL);
-            printf("opcode = %lx\n", opcode);
+            //printf("opcode = %lx\n", opcode);
             ptrace(PTRACE_SINGLESTEP, childPID, 0, 0);
         }
         printf("Tracee finished\n");
