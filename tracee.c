@@ -7,6 +7,6 @@
 #include <stdlib.h>
 
 int main(){
-    printf("hello.c");
+    printf("hello.c\n");
     return 1;
 }
