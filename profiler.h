@@ -4,6 +4,9 @@
  * @author Maxime Goffart (180521) & Olivier Joris (182113)
  */
 
+#ifndef __PROFILER__
+#define __PROFILER__
+
 typedef struct Profiler_t Profiler;
 
 /*
@@ -32,3 +35,5 @@ void profiler_clean(Profiler* profiler);
  * @param profiler: data of the profiling of the tracee.
  */
 void profiler_display_data(Profiler* profiler);
+
+#endif
