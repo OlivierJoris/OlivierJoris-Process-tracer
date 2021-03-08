@@ -23,6 +23,7 @@ LaunchMode load_arguments(int argc, char **argv)
         printf("Program launched in profiler mode on the %s tracee.\n", argv[2]);
         return profiler;
     }
+
     else
     {
         if(!strcmp(argv[1], "-s"))
@@ -30,8 +31,11 @@ LaunchMode load_arguments(int argc, char **argv)
             printf("Program launched in syscall mode on the %s tracee.\n", argv[2]);
             return syscall;
         }
+        
         else 
+        {
             fprintf(stderr, "Please choose among the proposed modes (profiler or syscall mode).\n");
             return error;
+        }
     }
 }
