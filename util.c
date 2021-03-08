@@ -20,14 +20,14 @@ LaunchMode load_arguments(int argc, char **argv)
 
     if(!strcmp(argv[1], "-p"))
     {
-        printf("Program launched in profiler mode on the %s tracee\n.", argv[2]);
+        printf("Program launched in profiler mode on the %s tracee.\n", argv[2]);
         return profiler;
     }
     else
     {
         if(!strcmp(argv[1], "-s"))
         {
-            printf("Program launched in syscall mode on the %s tracee\n.", argv[2]);
+            printf("Program launched in syscall mode on the %s tracee.\n", argv[2]);
             return syscall;
         }
         else 
