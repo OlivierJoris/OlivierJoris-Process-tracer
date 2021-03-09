@@ -1,10 +1,16 @@
+/*
+ * Interface to trace the system calls of a process.
+ * 
+ * @author Maxime Goffart (180521) & Olivier Joris (182113)
+ */
+
 #ifndef __SYSCALL__
 #define __SYSCALL__
 
 #include "file_sys_calls.h"
 
 /*
- * Trace the syscalls on the given tracee.
+ * Trace the syscalls of the given tracee.
  * 
  * @param tracee: path to the executable of the tracee.
  * @param fsc: pointer to FileSysCalls containing the mapping

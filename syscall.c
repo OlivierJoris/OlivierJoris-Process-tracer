@@ -1,3 +1,11 @@
+/*
+ * Module implementing the syscall interface.
+ * 
+ * @author Maxime Goffart (180521) & Olivier Joris (182113)
+ */
+
+#include "syscall.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,10 +18,8 @@
 #include <sys/reg.h>
 #include <sys/wait.h>
 
-#include "syscall.h"
-
 /*
- * Check if a system call has occured in the tracee process.
+ * Checks if a system call has occured in the tracee process.
  * 
  * @param tracee: pid of the process running the tracee.
  * 
@@ -26,10 +32,10 @@ static bool is_syscall(pid_t tracee);
  * Given a system call number, returns his name.
  * 
  * @param fsc: pointer to FileSysCalls containing the mapping
- * between system call ids and names
- * @param syscallNumber: system call number id
+ * between system call ids and names.
+ * @param syscallNumber: system call number id.
  * 
- * @return the name of the given system call number id.
+ * @return The name of the given system call number id.
  */
 static inline char *from_syscall_number_to_name(FileSysCalls* fsc, 
                                                 unsigned int syscallNumber);
