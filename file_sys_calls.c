@@ -72,6 +72,7 @@ void sys_calls_file_free(FileSysCalls* fsc){
         return;
     if(!fsc->mapping){
         free(fsc);
+        fsc = NULL;
         return;
     }
         
