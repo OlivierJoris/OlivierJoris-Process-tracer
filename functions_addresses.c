@@ -12,7 +12,7 @@
 
 /*
  * Represents a node inside the linked list containing
- *the mappings.
+ * the mappings.
  */
 typedef struct Mapping_t Mapping;
 struct Mapping_t{
@@ -52,6 +52,10 @@ FunctionsAddresses* functions_addresses_load(char* exec){
     }
 
     char* command = generate_command(exec);
+    if(!command){
+        functions_addresses_clean(fa);
+        return NULL;
+    }
     system(command);
     free(command);
 
@@ -61,12 +65,14 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
+    const int BUFFER_SIZE = 128;
+
     unsigned long address;
-    char buffer[128];
+    char buffer[BUFFER_SIZE];
     Mapping* current = fa->first;
     while(fscanf(f, "%lx %s\n", &address, buffer) != -1){
         current->addr = address;
-        current->symbol = malloc(sizeof(char) * 128);
+        current->symbol = malloc(sizeof(char) * BUFFER_SIZE);
         if(!current->symbol){
             functions_addresses_clean(fa);
             fclose(f);
@@ -93,15 +99,15 @@ static char* generate_command(char* exec){
     if(!exec)
         return NULL;
 
-    char* buffer = calloc(256, sizeof(char));
-    if(!buffer)
+    char* cmd = calloc(256, sizeof(char));
+    if(!cmd)
         return NULL;
 
-    sprintf(buffer, "nm --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[T]{1}[ ]{1}[A-Za-z_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
+    sprintf(cmd, "nm --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[T]{1}[ ]{1}[A-Za-z_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
 
-    printf("Command = %s\n", buffer);
+    printf("Command = %s\n", cmd);
 
-    return buffer;
+    return cmd;
 }
 
 void functions_addresses_clean(FunctionsAddresses* fa){

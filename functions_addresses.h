@@ -1,6 +1,6 @@
 /*
  * Interface to get mapping between function symbols and
- * addresses.
+ * addresses. Requires nm command to be available.
  * 
  * @author Maxime Goffart (180521) & Olivier Joris (182113)
  */
