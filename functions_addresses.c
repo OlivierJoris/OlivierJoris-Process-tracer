@@ -103,9 +103,7 @@ static char* generate_command(char* exec){
     if(!cmd)
         return NULL;
 
-    sprintf(cmd, "nm --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[T]{1}[ ]{1}[A-Za-z_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
-
-    printf("Command = %s\n", cmd);
+    sprintf(cmd, "nm --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
 
     return cmd;
 }
@@ -130,7 +128,7 @@ void functions_addresses_clean(FunctionsAddresses* fa){
     return;
 }
 
-char* functions_addresses_get(FunctionsAddresses* fa, unsigned long addr){
+char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr){
     if(!fa | !fa->first)
         return NULL;
 
@@ -142,4 +140,20 @@ char* functions_addresses_get(FunctionsAddresses* fa, unsigned long addr){
     }
 
     return NULL;
+}
+
+unsigned long function_addresses_get_addr(FunctionsAddresses* fa, char* symbol){
+    if(!fa || !fa->first)
+        return 0;
+
+    unsigned long addr = 0;
+
+    Mapping* mapping = fa->first;
+    while(mapping!= NULL){
+        if(!strcmp(symbol, mapping->symbol))
+            return mapping->addr;
+        mapping = mapping->next;
+    }
+
+    return addr;
 }

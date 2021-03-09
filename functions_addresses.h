@@ -40,6 +40,16 @@ void functions_addresses_clean(FunctionsAddresses* fa);
  * 
  * @return Symbol associated to the given address.
  */
-char* functions_addresses_get(FunctionsAddresses* fa, unsigned long addr);
+char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr);
+
+/*
+ * Gets the address associated to the given symbol.
+ * 
+ * @param fa: pointer to the mapping.
+ * @param symbol: symbol for which we want the associated address.
+ * 
+ * @return Address associated to the given symbol.
+ */
+unsigned long function_addresses_get_addr(FunctionsAddresses* fa, char* symbol);
 
 #endif
