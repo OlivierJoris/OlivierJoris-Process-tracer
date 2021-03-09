@@ -3,79 +3,107 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 #include <sys/wait.h>
 
-static int run_child(char *tracee);
+#include "syscall.h"
 
-static int run_this(pid_t child);
+/*
+ * Check if a system call has occured in the tracee process.
+ * 
+ * @param tracee: pid of the process running the tracee.
+ * 
+ * @return true If a syscall has been detected in the tracee.
+ *         false If the tracee exited.
+ */
+static bool is_syscall(pid_t tracee);
 
-static int get_syscall(pid_t child);
+/*
+ * Given a system call number, returns his name.
+ * 
+ * @param fsc: pointer to FileSysCalls containing the mapping
+ * between system call ids and names
+ * @param syscallNumber: system call number id
+ * 
+ * @return the name of the given system call number id.
+ */
+static inline char *from_syscall_number_to_name(FileSysCalls* fsc, 
+                                                unsigned int syscallNumber);
 
-int trace_syscalls(char *tracee)
+int trace_syscalls(char *tracee, FileSysCalls *fsc)
 {
-    pid_t childPID = fork();
+    pid_t traceePID = fork();
 
-    if(childPID < 0)
+    if(traceePID < 0)
+    {
         fprintf(stderr, "Failed forking process !\n");
+        return EXIT_FAILURE;
+    }
 
     else 
     {
-        if(childPID == 0)
-            return run_child(tracee);
+        if(traceePID == 0)
+        {
+            char* argv[] = {NULL};
+            char* env[] = {NULL};
+
+            ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+
+            return execve(tracee, argv, env);
+        }
 
         else 
-            return run_this(childPID);
+        {
+            int status;
+            unsigned int syscallNumber;
+
+            waitpid(traceePID, &status, 0);
+            ptrace(PTRACE_SETOPTIONS, traceePID, NULL, PTRACE_O_TRACESYSGOOD);
+
+            while(true) 
+            {
+                if(!is_syscall(traceePID)) 
+                    break;
+
+                syscallNumber = ptrace(PTRACE_PEEKUSER, traceePID,
+                                       sizeof(long) * ORIG_EAX);
+
+                printf("syscall: %s\n", from_syscall_number_to_name(fsc,
+                                                            syscallNumber));
+
+                if(!is_syscall(traceePID)) 
+                    break;
+            }
+
+            return EXIT_SUCCESS;
+        }
     }
 }
 
-static int run_child(char *tracee)
-{
-    char *childArg[2];
-    
-    childArg[0] = tracee;
-
-    childArg[1] = NULL;
-
-    ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-    kill(getpid(), SIGSTOP);
-
-    return execvp(childArg[0], childArg);
-}
-
-static int run_this(pid_t childPID)
-{
-    int status, syscallNumber;
-
-    waitpid(childPID, &status, 0);
-    ptrace(PTRACE_SETOPTIONS, childPID, NULL, PTRACE_O_TRACESYSGOOD);
-
-    while(true) 
-    {
-        if(get_syscall(childPID) != 0) 
-            break;
-
-        syscallNumber = ptrace(PTRACE_PEEKUSER, childPID, sizeof(long) * ORIG_RAX);
-        printf("syscall: %d\n", syscallNumber);
-    }
-
-    return 0;
-}
-
-static int get_syscall(pid_t childPID)
+static bool is_syscall(pid_t traceePID)
 {
     int status;
 
     while(true) 
     {
-        ptrace(PTRACE_SYSCALL, childPID, NULL, NULL);
-        waitpid(childPID, &status, 0);
-        
-        if(WIFSTOPPED(status) && (WSTOPSIG(status) & 0x80))
-            return 0;
+        ptrace(PTRACE_SYSCALL, traceePID, NULL, NULL);
+        waitpid(traceePID, &status, 0);
 
         if(WIFEXITED(status))
-            return 1;
+            return false;
+        
+        // 0x80 = 0b1000000000000000 (check if high bit is set)
+        if(WIFSTOPPED(status) && (WSTOPSIG(status) & 0x80)) 
+            return true;
     }
+}
+
+static inline char *from_syscall_number_to_name(FileSysCalls* fsc, 
+                                                unsigned int syscallNumber)
+{
+    return get_sys_call_name(fsc, syscallNumber);
 }

@@ -1,6 +1,7 @@
 #include "util.h"
 #include "profiler.h"
 #include "functions_addresses.h"
+#include "syscall.h"
 
 #include <stdio.h>
 
@@ -23,8 +24,18 @@ int main(int argc, char* argv[]){
             break;
         case syscall:
             printf("Detected syscall mode\n");
-            /* TO BE FILLED */
-            break;
+            FileSysCalls *fsc = load_file();
+            if(trace_syscalls(argv[2], fsc) == 0)
+            {
+                sys_calls_file_free(fsc);
+                break;
+            }
+                
+            else
+            {
+                sys_calls_file_free(fsc);
+                return -1;
+            }
         case error:
             fprintf(stderr, "Error while parsing arguments!\n");
             return -1;
