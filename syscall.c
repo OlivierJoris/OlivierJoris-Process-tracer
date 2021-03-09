@@ -28,18 +28,6 @@
  */
 static bool is_syscall(pid_t tracee);
 
-/*
- * Given a system call number, returns his name.
- * 
- * @param fsc: pointer to FileSysCalls containing the mapping
- * between system call ids and names.
- * @param syscallNumber: system call number id.
- * 
- * @return The name of the given system call number id.
- */
-static inline char *from_syscall_number_to_name(FileSysCalls* fsc, 
-                                                unsigned int syscallNumber);
-
 int trace_syscalls(char *tracee, FileSysCalls *fsc)
 {
     pid_t traceePID = fork();
@@ -78,8 +66,7 @@ int trace_syscalls(char *tracee, FileSysCalls *fsc)
                 syscallNumber = ptrace(PTRACE_PEEKUSER, traceePID,
                                        sizeof(long) * ORIG_EAX);
 
-                printf("syscall: %s\n", from_syscall_number_to_name(fsc,
-                                                            syscallNumber));
+                printf("syscall: %s\n", get_sys_call_name(fsc, syscallNumber));
 
                 if(!is_syscall(traceePID)) 
                     break;
@@ -106,10 +93,4 @@ static bool is_syscall(pid_t traceePID)
         if(WIFSTOPPED(status) && (WSTOPSIG(status) & 0x80)) 
             return true;
     }
-}
-
-static inline char *from_syscall_number_to_name(FileSysCalls* fsc, 
-                                                unsigned int syscallNumber)
-{
-    return get_sys_call_name(fsc, syscallNumber);
 }
