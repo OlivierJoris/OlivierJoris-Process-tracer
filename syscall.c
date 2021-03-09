@@ -58,7 +58,7 @@ int trace_syscalls(char *tracee, FileSysCalls *fsc)
             char* env[] = {NULL};
 
             ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-
+            close(1);
             return execve(tracee, argv, env);
         }
 
