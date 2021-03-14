@@ -1,0 +1,254 @@
+Program launched in profiler mode on the tracee2 tracee.
+Detected profiler mode
+Tracee path = tracee2
+Address of main = 804889c
+__libc_start_main
+    init_cpu_features.constprop.0
+        get_common_indeces.constprop.1
+        ret
+    ret
+    generic_start_main
+        _dl_aux_init
+            Error fecth for 806fdc0
+                Error fecth for 806fc90
+                    Error fecth for 806fe60
+                        Error fecth for 806ff08
+                            Error fecth for 806fe48
+                                Error fecth for 806fee0
+                                    Error fecth for 806fca0
+                                        Error fecth for 806fec8
+                                            Error fecth for 806fca0
+                                                Error fecth for 806fca0
+                                                    Error fecth for 806fca0
+                                                        Error fecth for 806fef8
+                                                            Error fecth for 806feb8
+                                                                Error fecth for 806fea8
+                                                                    Error fecth for 806fe98
+                                                                        Error fecth for 806fe08
+                                                                            Error fecth for 806fdf0
+                                                                                Error fecth for 806fca0
+                                                                                    Error fecth for 806fe80
+                                                                                        _dl_discover_osversion
+                                                                                            uname
+                                                                                            ret
+                                                                                        ret
+                                                                                    ret
+                                                                                ret
+                                                                            ret
+                                                                        ret
+                                                                    ret
+                                                                ret
+                                                            ret
+                                                        ret
+                                                    ret
+                                                ret
+                                            ret
+                                        ret
+                                    ret
+                                ret
+                            ret
+                            __pthread_initialize_minimal
+                                __libc_setup_tls
+                                    sbrk
+                                        brk
+                                        ret
+                                    ret
+                                    brk
+                                    ret
+                                ret
+                            ret
+                            memcpy
+                            ret
+                        ret
+                    ret
+                ret
+                Error fecth for 8048a3f
+                    __libc_init_first
+                        __libc_init_secure
+                        ret
+                        _dl_non_dynamic_init
+                            _dl_get_origin
+                            ret
+                            __libc_malloc
+                                ptmalloc_init.part.6
+                                ret
+                                _int_malloc
+                                    malloc_consolidate
+                                    ret
+                                    sysmalloc
+                                        sbrk
+                                            brk
+                                            ret
+                                        ret
+                                    ret
+                                ret
+                                sbrk
+                                    brk
+                                    ret
+                                ret
+                            ret
+                        ret
+                    ret
+                ret
+            ret
+        ret
+        mempcpy
+        ret
+    ret
+    getenv
+        strlen
+        ret
+    ret
+    _dl_new_object
+        strlen
+        ret
+        calloc
+            _int_malloc
+            ret
+            Error fecth for 8048270
+                __memset_sse2_rep
+                    Error fecth for 8060595
+                    ret
+                ret
+                memcpy
+                ret
+            ret
+            _dl_setup_hash
+                strlen
+                ret
+                __libc_malloc
+                    _int_malloc
+                    ret
+                ret
+                memcpy
+                ret
+                _dl_add_to_namespace_list
+                ret
+                getenv
+                    strlen
+                    ret
+                ret
+                _dl_init_paths
+                    _dl_important_hwcaps
+                        Error fecth for 8048250
+                            __memcmp_sse4_2
+                            ret
+                            access
+                            ret
+                        ret
+                        strlen
+                        ret
+                        __libc_malloc
+                            _int_malloc
+                            ret
+                        ret
+                        mempcpy
+                        ret
+                        mempcpy
+                        ret
+                        Error fecth for 80992cc
+                            mempcpy
+                            ret
+                            mempcpy
+                            ret
+                        ret
+                        __libc_malloc
+                            _int_malloc
+                            ret
+                        ret
+                        __libc_malloc
+                            _int_malloc
+                            ret
+                        ret
+                    ret
+                    getenv
+                        strlen
+                        ret
+                    ret
+                    getenv
+                        strlen
+                        ret
+                    ret
+                    getenv
+                        strlen
+                        ret
+                    ret
+                    getenv
+                        strlen
+                        ret
+                    ret
+                    init_cpu_features.constprop.0
+                    ret
+                    getenv
+                        strlen
+                        ret
+                    ret
+                    strlen
+                    ret
+                ret
+                __init_misc
+                ret
+            ret
+            __cxa_atexit
+                __new_exitfn
+                ret
+            ret
+            Error fecth for 8048a82
+                _init
+                    __x86.get_pc_thunk.bx
+                    ret
+                ret
+                Error fecth for 804882b
+                    __register_frame_info_bases
+                        __x86.get_pc_thunk.bx
+                        ret
+                    ret
+                ret
+                handle_intel
+                    intel_check_word
+                    ret
+                    intel_check_word
+                    ret
+                ret
+                handle_intel
+                    intel_check_word
+                    ret
+                    intel_check_word
+                    ret
+                ret
+            ret
+        ret
+        _dl_debug_initialize
+        ret
+        _setjmp
+        ret
+        Error fecth for 8048ad3
+            f
+                f2
+                ret
+            ret
+        ret
+    ret
+ret
+exit
+    __run_exit_handlers
+        deregister_tm_clones
+            __x86.get_pc_thunk.bx
+            ret
+        ret
+    ret
+    __x86.get_pc_thunk.bx
+    ret
+ret
+_IO_flush_all_lockp
+ret
+ret
+_exit
+
+
+** Nb calls = 121 | nb rets = 121 **
+
+Tracee finished
+
+** PROFILER's DATA **
+Tracee name = tracee2

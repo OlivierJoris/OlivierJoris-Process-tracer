@@ -103,7 +103,7 @@ static char* generate_command(char* exec){
     if(!cmd)
         return NULL;
 
-    sprintf(cmd, "nm --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
+    sprintf(cmd, "nm -a --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
 
     return cmd;
 }
