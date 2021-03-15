@@ -2,6 +2,8 @@ tracer
 nm.txt
 assembly.txt
 result.txt
+addr.txt
+dump.txt
 *.DS_Store
 *.vscode
 *.mp4

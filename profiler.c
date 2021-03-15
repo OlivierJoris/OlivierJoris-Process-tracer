@@ -82,13 +82,6 @@ static void trace_function_calls(Profiler* profiler){
     if(!fa)
         return;
 
-    unsigned long mainADDR = function_addresses_get_addr(fa, "main");
-    if(mainADDR == 0){
-        functions_addresses_clean(fa);
-        return;
-    }
-    printf("Address of main = %lx\n", mainADDR);
-
     int status;
     struct user_regs_struct userRegs;
     bool nextIsCallee = false;
@@ -98,6 +91,8 @@ static void trace_function_calls(Profiler* profiler){
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes - 2^16-1
     const unsigned long PREFIX2 = 65535;
+    // Used to get opcode on 2 bytes excluding 3d hex digit.
+    const unsigned long PREFIX3 = 61695;
 
     while(running){
         wait(&status);
@@ -109,13 +104,12 @@ static void trace_function_calls(Profiler* profiler){
             
         // Get instruction - EIP = 32 bits instruction register
         unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, userRegs.eip, NULL);
-        //printf("%lx | ", userRegs.eip);
+
         if(nextIsCallee){
             nbCalls++;
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
-            for(unsigned long i = 0; i < NB_BLANKS * depth; i++){
+            for(unsigned long i = 0; i < NB_BLANKS * depth; i++)
                 printf(" ");
-            }
             if(!symbol)
                 printf("Error fecth for %lx\n", userRegs.eip);
             else
@@ -128,72 +122,20 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long opcode = instr & PREFIX;
         // Opcode (on 2 bytes) is the last 4 hex digits because ptrace uses big-endian
         unsigned long opcode2 = instr & PREFIX2;
-        //printf("%lx | %lx\n", opcode, opcode2);
+        // Opcode (on 2 bytes).
+        unsigned long opcode3 = instr & PREFIX3;
 
         // Opcodes for CALL
-        if(opcode == 0xe8){
-            //printf("0xe8 "); printf("%lx\n", userRegs.eip);
+        if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff)
             nextIsCallee = true;
-        }
-
-        if(opcode == 0x9a){
-            //printf("0x9A "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode == 0xcc){
-            //printf("0xcc"); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode == 0xcd){
-            //printf("0xcd "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode == 0xf1){
-            //printf("0xf1 "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode == 0xce){
-            //printf("0xf1 "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0x20ff){
-            //printf("0x20ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0x30ff){
-            //printf("0x30ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0xd0ff){
-            //printf("0xd0ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0xd2ff){
-            //printf("0xd2ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0x16ff){
-            //printf("0x16ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0x54ff){
-            //printf("0x54ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
-        if(opcode2 == 0x14ff){
-            //printf("0x14ff "); printf("%lx\n", userRegs.eip);
-            nextIsCallee = true;
-        }
 
         // Opcodes for RET
-        if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode == 0xcf
-            || opcode == 0XC9){
+        if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode == 0xc9 || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
             nbRets++;
             if(depth > 0)
                 depth-=1;
-            for(unsigned long int i = 0; i < NB_BLANKS * depth; i++){
+            for(unsigned long int i = 0; i < NB_BLANKS * depth; i++)
                 printf(" ");
-            }
             printf("ret\n");
         }
 

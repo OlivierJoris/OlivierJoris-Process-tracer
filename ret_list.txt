@@ -1,0 +1,11 @@
+
+ 8048799:	f3 c3                	repz ret 
+ 804f26d:	c3                   	ret    
+ 805ac4b:	c2 04 00             	ret    $0x4
+ 807123d:	c2 0c 00             	ret    $0xc
+ 8072039:	c2 08 00             	ret    $0x8
+ 80723ee:	c2 0c 00             	ret    $0xc
+ 808cd74:	c2 00 00             	ret    $0x0
+ 80961f5:	c2 14 00             	ret    $0x14
+ 809c3eb:	f2 c3                	bnd ret  
+ 80a1ba6:	c2 10 00             	ret    $0x10
