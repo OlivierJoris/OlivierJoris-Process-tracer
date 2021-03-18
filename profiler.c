@@ -81,6 +81,10 @@ static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth
 
 static void func_call_free(Func_call* fc);
 
+void func_call_print(Func_call* fc);
+
+void func_call_print_unqiue(Func_call* tmp);
+
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
     if(!profiler){
@@ -173,7 +177,7 @@ static void trace_function_calls(Profiler* profiler){
                     char* buffer = malloc(sizeof(char) * 100);
                     if(!buffer)
                         return;
-                    sprintf(buffer, "Error fecth for %lx\n", userRegs.eip);
+                    sprintf(buffer, "Error fecth for %lx", userRegs.eip);
                     func_call_set(currNode->next, currNode, depth, buffer);
                     free(buffer);
                 }
@@ -184,13 +188,13 @@ static void trace_function_calls(Profiler* profiler){
                 if(!currNode->children)
                     return;
                 if(symbol != NULL){ // Temporary
-                    func_call_set(currNode->children, currNode, depth+1, symbol);
+                    func_call_set(currNode->children, currNode, depth, symbol);
                 }else{
                     char* buffer = malloc(sizeof(char) * 100);
                     if(!buffer)
                         return;
-                    sprintf(buffer, "Error fecth for %lx\n", userRegs.eip);
-                    func_call_set(currNode->children, currNode, depth+1, buffer);
+                    sprintf(buffer, "Error fecth for %lx", userRegs.eip);
+                    func_call_set(currNode->children, currNode, depth, buffer);
                     free(buffer);
                 }
                 
@@ -219,9 +223,6 @@ static void trace_function_calls(Profiler* profiler){
             nbRets++;
             if(depth > 0)
                 depth-=1;
-            for(unsigned long int i = 0; i < NB_BLANKS * depth; i++)
-                printf(" ");
-            printf("ret\n");
         }
 
         currNode->nbInstr++; // update number of instr
@@ -242,6 +243,8 @@ void profiler_clean(Profiler* profiler){
         return;
     if(profiler->tracee)
         free(profiler->tracee);
+    if(profiler->entryPoint)
+        func_call_free(profiler->entryPoint);
     free(profiler);
     return;
 }
@@ -250,6 +253,7 @@ void profiler_display_data(Profiler* profiler){
     // For submit, should respect given format.
     printf("\n** PROFILER's DATA **\n");
     printf("Tracee name = %s\n", profiler->tracee);
+    func_call_print(profiler->entryPoint);
     return;
 }
 
@@ -309,8 +313,51 @@ void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char*
     return;
 }
 
-void func_call_free(Func_call* fc){
-
+void func_call_print(Func_call* fc){
+    if(!fc)
+        return;
     
+    Func_call* tmp = fc;
+    while(tmp != NULL){
+        func_call_print_unqiue(tmp);
+        if(tmp->children)
+            func_call_print(tmp->children);
+        tmp = tmp->next;
+    }
+}
 
+void func_call_print_unqiue(Func_call* tmp){
+    if(!tmp)
+        printf("func_call_print_unqiue: null ptr!");
+    for(unsigned int i = 0; i < NB_BLANKS * tmp->depth; ++i)
+        printf(" ");
+    if(tmp->name)
+        printf("%s: %u\n", tmp->name, tmp->nbInstr);
+    else
+        printf("func_call_print_unqiue: unable to get name!\n");
+
+    return;
+}
+
+void func_call_free(Func_call* fc){
+    if(!fc)
+        return;
+
+    Func_call* tmp = fc;
+    while(tmp != NULL){
+        if(tmp->name){
+            free(tmp->name);
+            tmp->name = NULL;
+        }
+        if(tmp->children){
+            func_call_free(tmp->children);
+            tmp->children = NULL;
+        }
+        Func_call* tmp2 = tmp->next;
+        if(tmp){
+            free(tmp);
+            tmp = NULL;
+        }
+        tmp = tmp2;
+    }
 }
