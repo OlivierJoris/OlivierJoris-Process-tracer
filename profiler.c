@@ -162,6 +162,8 @@ static void trace_function_calls(Profiler* profiler){
                 printf("%s\n", symbol);
             //printf(" | %lx\n", userRegs.eip);
 
+            Func_call* tmp_next;
+            // Need to update next field.
             if(depth == currNode->depth || depth == currNode->depth - 1){
                 if(depth == currNode->depth - 1){
                     while(currNode->depth > depth) // Go back until we reach same depth
@@ -171,35 +173,27 @@ static void trace_function_calls(Profiler* profiler){
                 currNode->next = func_call_create_node();
                 if(!currNode->next)
                     return;
-                if(symbol != NULL){ // Temporary
-                    func_call_set(currNode->next, currNode, depth, symbol);
-                }else{
-                    char* buffer = malloc(sizeof(char) * 100);
-                    if(!buffer)
-                        return;
-                    sprintf(buffer, "Error fecth for %lx", userRegs.eip);
-                    func_call_set(currNode->next, currNode, depth, buffer);
-                    free(buffer);
-                }
-                
-                currNode = currNode->next;
-            }else{ // depth + 1 -> children field need to be updated.
+                tmp_next = currNode->next;
+            }else{
+                // Need to update children field.
                 currNode->children = func_call_create_node();
                 if(!currNode->children)
                     return;
-                if(symbol != NULL){ // Temporary
-                    func_call_set(currNode->children, currNode, depth, symbol);
-                }else{
-                    char* buffer = malloc(sizeof(char) * 100);
-                    if(!buffer)
-                        return;
-                    sprintf(buffer, "Error fecth for %lx", userRegs.eip);
-                    func_call_set(currNode->children, currNode, depth, buffer);
-                    free(buffer);
-                }
-                
-                currNode = currNode->children;
+                tmp_next = currNode->children;
             }
+
+            if(symbol != NULL){ // After bugs solved, only symbol (not buffer)
+                func_call_set(tmp_next, currNode, depth, symbol);
+            }else{
+                char* buffer = malloc(sizeof(char) * 100);
+                if(!buffer)
+                    return;
+                sprintf(buffer, "Error fecth for %lx", userRegs.eip);
+                func_call_set(tmp_next, currNode, depth, buffer);
+                free(buffer);
+            }
+            
+            currNode = tmp_next;
 
             nextIsCallee = false;
             depth+=1;
@@ -253,7 +247,8 @@ void profiler_display_data(Profiler* profiler){
     // For submit, should respect given format.
     printf("\n** PROFILER's DATA **\n");
     printf("Tracee name = %s\n", profiler->tracee);
-    func_call_print(profiler->entryPoint);
+    if(profiler->entryPoint && profiler->entryPoint->next)
+        func_call_print(profiler->entryPoint->next);
     return;
 }
 
