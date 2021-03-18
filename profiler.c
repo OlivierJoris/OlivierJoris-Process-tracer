@@ -139,6 +139,7 @@ static void trace_function_calls(Profiler* profiler){
         return;
     
     Func_call* currNode = profiler->entryPoint;
+    unsigned int prevDepth;
 
     while(running){
         wait(&status);
@@ -161,6 +162,25 @@ static void trace_function_calls(Profiler* profiler){
             else
                 printf("%s\n", symbol);
             //printf(" | %lx\n", userRegs.eip);
+
+            // TO IMPROVE
+            Func_call* tmp_prev = currNode;
+            prevDepth = currNode->depth;
+            currNode->nbInstrChild = currNode->nbInstr;
+            while(tmp_prev != NULL){
+                if(prevDepth == tmp_prev->depth + 1){
+                    tmp_prev->nbInstrChild+=currNode->nbInstr;
+                    tmp_prev = tmp_prev->prev;
+                }
+                else{
+                    while(tmp_prev != NULL && tmp_prev->depth != prevDepth - 1)
+                        tmp_prev = tmp_prev->prev;
+                    if(tmp_prev != NULL)
+                        tmp_prev->nbInstrChild+=currNode->nbInstr;
+                }
+                if(tmp_prev != NULL)
+                    prevDepth = tmp_prev->depth;
+            }
 
             Func_call* tmp_next;
             // Need to update next field.
@@ -223,6 +243,25 @@ static void trace_function_calls(Profiler* profiler){
 
         // Next instruction
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
+    }
+
+    // Last update -- TO IMPROVE
+    Func_call* tmp_prev = currNode;
+    prevDepth = currNode->depth;
+    currNode->nbInstrChild = currNode->nbInstr;
+    while(tmp_prev != NULL){
+        if(prevDepth == tmp_prev->depth + 1){
+            tmp_prev->nbInstrChild+=currNode->nbInstr;
+            tmp_prev = tmp_prev->prev;
+        }
+        else{
+            while(tmp_prev != NULL && tmp_prev->depth != prevDepth - 1)
+                tmp_prev = tmp_prev->prev;
+            if(tmp_prev != NULL)
+                tmp_prev->nbInstrChild+=currNode->nbInstr;
+        }
+        if(tmp_prev != NULL)
+            prevDepth = tmp_prev->depth;
     }
 
     printf("\n\n** Nb calls = %lu | nb rets = %lu **\n", nbCalls, nbRets);
@@ -327,7 +366,7 @@ void func_call_print_unqiue(Func_call* tmp){
     for(unsigned int i = 0; i < NB_BLANKS * tmp->depth; ++i)
         printf(" ");
     if(tmp->name)
-        printf("%s: %u\n", tmp->name, tmp->nbInstr);
+        printf("%s: %u | %u\n", tmp->name, tmp->nbInstr, tmp->nbInstrChild);
     else
         printf("func_call_print_unqiue: unable to get name!\n");
 
