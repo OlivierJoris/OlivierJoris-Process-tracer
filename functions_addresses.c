@@ -134,7 +134,7 @@ char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr)
 
     Mapping* mapping = fa->first;
     while(mapping != NULL){
-        if(mapping->addr == addr)
+        if(mapping->symbol != NULL && mapping->addr == addr)
             return mapping->symbol;
         mapping = mapping->next;
     }

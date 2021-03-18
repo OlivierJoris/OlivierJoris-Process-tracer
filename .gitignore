@@ -3,7 +3,8 @@ nm.txt
 assembly.txt
 result.txt
 addr.txt
-dump.txt
+dump*
+out*
 *.DS_Store
 *.vscode
 *.mp4

@@ -23,9 +23,26 @@
  */
 #define NB_BLANKS 4
 
-struct Profiler_t {
+/*
+ * Represents a call to a function.
+ */
+typedef struct Func_call_t Func_call;
+struct Func_call_t{
+    Func_call* prev;            // Previous called function (parent)
+    unsigned long addr;         // Address of beginning of function call
+    char* name;                 // Name of the function
+    unsigned int nbInstr;       // Number of local instructions
+    unsigned int nbInstrChild;  // Number of instructions (including children)
+    unsigned int nbRecCalls;    // Number of rec calls (0 -> no recursivity)
+    Func_call* children;        // Children function
+    Func_call* next;            // Next function
+    unsigned int depth;         // Depth inside call tree
+};
+
+struct Profiler_t{
     char* tracee;
     pid_t childPID;
+    Func_call* entryPoint;
 };
 
 /*
@@ -44,6 +61,25 @@ static Profiler* init_profiler(char* tracee);
  * trace the function calls.
  */
 static void trace_function_calls(Profiler* profiler);
+
+/*
+ * Creates a node representing a function call.
+ * 
+ * @return New node.
+ */
+static Func_call* func_call_create_node(void);
+
+/*
+ * Set the fields of the new node.
+ * 
+ * @param new Node to be set.
+ * @param prev Link to parent of new node.
+ * @param newDepth Depth of the new node.
+ * @param Symbol of function of new node.
+ */
+static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char* symbol);
+
+static void func_call_free(Func_call* fc);
 
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
@@ -94,6 +130,12 @@ static void trace_function_calls(Profiler* profiler){
     // Used to get opcode on 2 bytes excluding 3d hex digit.
     const unsigned long PREFIX3 = 61695;
 
+    profiler->entryPoint = func_call_create_node();
+    if(!profiler->entryPoint)
+        return;
+    
+    Func_call* currNode = profiler->entryPoint;
+
     while(running){
         wait(&status);
         if(WIFEXITED(status))
@@ -114,6 +156,47 @@ static void trace_function_calls(Profiler* profiler){
                 printf("Error fecth for %lx\n", userRegs.eip);
             else
                 printf("%s\n", symbol);
+            //printf(" | %lx\n", userRegs.eip);
+
+            if(depth == currNode->depth || depth == currNode->depth - 1){
+                if(depth == currNode->depth - 1){
+                    while(currNode->depth > depth) // Go back until we reach same depth
+                        currNode = currNode->prev;
+                }
+
+                currNode->next = func_call_create_node();
+                if(!currNode->next)
+                    return;
+                if(symbol != NULL){ // Temporary
+                    func_call_set(currNode->next, currNode, depth, symbol);
+                }else{
+                    char* buffer = malloc(sizeof(char) * 100);
+                    if(!buffer)
+                        return;
+                    sprintf(buffer, "Error fecth for %lx\n", userRegs.eip);
+                    func_call_set(currNode->next, currNode, depth, buffer);
+                    free(buffer);
+                }
+                
+                currNode = currNode->next;
+            }else{ // depth + 1 -> children field need to be updated.
+                currNode->children = func_call_create_node();
+                if(!currNode->children)
+                    return;
+                if(symbol != NULL){ // Temporary
+                    func_call_set(currNode->children, currNode, depth+1, symbol);
+                }else{
+                    char* buffer = malloc(sizeof(char) * 100);
+                    if(!buffer)
+                        return;
+                    sprintf(buffer, "Error fecth for %lx\n", userRegs.eip);
+                    func_call_set(currNode->children, currNode, depth+1, buffer);
+                    free(buffer);
+                }
+                
+                currNode = currNode->children;
+            }
+
             nextIsCallee = false;
             depth+=1;
         }
@@ -126,8 +209,10 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long opcode3 = instr & PREFIX3;
 
         // Opcodes for CALL
-        if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff)
+        if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff){
             nextIsCallee = true;
+            //printf("%lx | %lx | ", instr, userRegs.eip);
+        }
 
         // Opcodes for RET
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode == 0xc9 || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
@@ -138,6 +223,8 @@ static void trace_function_calls(Profiler* profiler){
                 printf(" ");
             printf("ret\n");
         }
+
+        currNode->nbInstr++; // update number of instr
 
         // Next instruction
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
@@ -183,5 +270,47 @@ Profiler* init_profiler(char* tracee){
     }
     strcpy(profiler->tracee, tracee);
 
+    profiler->entryPoint = NULL;
+
     return profiler;
+}
+
+Func_call* func_call_create_node(void){
+    Func_call* node = malloc(sizeof(Func_call));
+    if(!node)
+        return NULL;
+
+    node->prev = NULL;
+    node->name = NULL;
+    node->nbInstr = 0;
+    node->nbInstrChild = 0;
+    node->nbRecCalls = 0;
+    node->children = NULL;
+    node->next = NULL;
+    node->depth = 0;
+    
+    return node;
+}
+
+void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char* symbol){
+    if(!new)
+        return;
+
+    new->prev = prev;
+    new->depth = newDepth;
+    if(symbol){
+        size_t length = strlen(symbol) + 1;
+        new->name = malloc(sizeof(char) * length);
+        if(!new->name)
+            return;
+        strcpy(new->name, symbol);
+    }
+
+    return;
+}
+
+void func_call_free(Func_call* fc){
+
+    
+
 }
