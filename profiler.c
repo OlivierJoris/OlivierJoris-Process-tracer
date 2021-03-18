@@ -40,13 +40,13 @@ struct Func_call_t{
 };
 
 struct Profiler_t{
-    char* tracee;
-    pid_t childPID;
-    Func_call* entryPoint;
+    char* tracee;               // Tracee's name
+    pid_t childPID;             // PID of tracee
+    Func_call* entryPoint;      // Entry point of the call tree
 };
 
 /*
- * Initialize the profiler.
+ * Initializes the profiler.
  * 
  * @param tracee: path to the executable of the tracee.
  * 
@@ -70,7 +70,7 @@ static void trace_function_calls(Profiler* profiler);
 static Func_call* func_call_create_node(void);
 
 /*
- * Set the fields of the new node.
+ * Sets the fields of the new node.
  * 
  * @param new Node to be set.
  * @param prev Link to parent of new node.
@@ -79,11 +79,27 @@ static Func_call* func_call_create_node(void);
  */
 static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char* symbol);
 
+/*
+ * Frees the memory aasociated to a Func_call.
+ * 
+ * @param fc Func_call to free.
+ */
 static void func_call_free(Func_call* fc);
 
-void func_call_print(Func_call* fc);
+/*
+ * Prints the function calls as in the brief.
+ * 
+ * @param fc Start of the function calls.
+ */
+static void func_call_print(Func_call* fc);
 
-void func_call_print_unqiue(Func_call* tmp);
+/*
+ * Prints a function as in the brief (function's name and
+ * number of instructions including children).
+ * 
+ * @param fc Function to print.
+ */
+static void func_call_print_unqiue(Func_call* fc);
 
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
@@ -163,6 +179,7 @@ static void trace_function_calls(Profiler* profiler){
                 printf("%s\n", symbol);
             //printf(" | %lx\n", userRegs.eip);
 
+            // Updates number of instructions recursively
             Func_call* tmp_prev = currNode;
             prevDepth = currNode->depth;
             currNode->nbInstrChild = currNode->nbInstr;
@@ -175,6 +192,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
             }
 
+            // Update structure of the tree
             Func_call* tmp_next;
             // Need to update next field.
             if(depth == currNode->depth || depth == currNode->depth - 1){
@@ -216,7 +234,7 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long opcode = instr & PREFIX;
         // Opcode (on 2 bytes) is the last 4 hex digits because ptrace uses big-endian
         unsigned long opcode2 = instr & PREFIX2;
-        // Opcode (on 2 bytes).
+        // Opcode (on 2 bytes) excluding 3d hex digit.
         unsigned long opcode3 = instr & PREFIX3;
 
         // Opcodes for CALL
@@ -238,6 +256,7 @@ static void trace_function_calls(Profiler* profiler){
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
     }
 
+    // Last recursive update to number of instructions
     Func_call* tmp_prev = currNode;
     prevDepth = currNode->depth;
     currNode->nbInstrChild = currNode->nbInstr;
@@ -346,13 +365,13 @@ void func_call_print(Func_call* fc){
     }
 }
 
-void func_call_print_unqiue(Func_call* tmp){
-    if(!tmp)
+void func_call_print_unqiue(Func_call* fc){
+    if(!fc)
         printf("func_call_print_unqiue: null ptr!");
-    for(unsigned int i = 0; i < NB_BLANKS * tmp->depth; ++i)
+    for(unsigned int i = 0; i < NB_BLANKS * fc->depth; ++i)
         printf(" ");
-    if(tmp->name)
-        printf("%s: %u | %u\n", tmp->name, tmp->nbInstr, tmp->nbInstrChild);
+    if(fc->name)
+        printf("%s: %u | %u\n", fc->name, fc->nbInstr, fc->nbInstrChild);
     else
         printf("func_call_print_unqiue: unable to get name!\n");
 
