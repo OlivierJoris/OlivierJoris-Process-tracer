@@ -150,6 +150,9 @@ static void trace_function_calls(Profiler* profiler){
     // Used to get opcode on 2 bytes excluding 3d hex digit.
     const unsigned long PREFIX3 = 61695;
 
+    bool nextIsDeref = false;
+    unsigned long comingAddr;
+
     profiler->entryPoint = func_call_create_node();
     if(!profiler->entryPoint)
         return;
@@ -171,13 +174,18 @@ static void trace_function_calls(Profiler* profiler){
         if(nextIsCallee){
             nbCalls++;
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
+            char* symbolDeref;
             for(unsigned long i = 0; i < NB_BLANKS * depth; i++)
                 printf(" ");
-            if(!symbol)
-                printf("Error fecth for %lx\n", userRegs.eip);
+            if(!symbol){
+                if(nextIsDeref){
+                    symbolDeref = function_address_get_symbol_deref(profiler->tracee, comingAddr);
+                    printf("%s\n", symbolDeref);
+                    nextIsDeref = 0;
+                }
+            }
             else
                 printf("%s\n", symbol);
-            //printf(" | %lx\n", userRegs.eip);
 
             // Updates number of instructions recursively
             Func_call* tmp_prev = currNode;
@@ -216,12 +224,8 @@ static void trace_function_calls(Profiler* profiler){
             if(symbol != NULL){ // After bugs solved, only symbol (not buffer)
                 func_call_set(tmp_next, currNode, depth, symbol);
             }else{
-                char* buffer = malloc(sizeof(char) * 100);
-                if(!buffer)
-                    return;
-                sprintf(buffer, "Error fecth for %lx", userRegs.eip);
-                func_call_set(tmp_next, currNode, depth, buffer);
-                free(buffer);
+                func_call_set(tmp_next, currNode, depth, symbolDeref);
+                free(symbolDeref);
             }
             
             currNode = tmp_next;
@@ -240,6 +244,10 @@ static void trace_function_calls(Profiler* profiler){
         // Opcodes for CALL
         if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff){
             nextIsCallee = true;
+            if(opcode2 == 0x15ff){
+                nextIsDeref = true;
+                comingAddr = userRegs.eip;
+            }
             //printf("%lx | %lx | ", instr, userRegs.eip);
         }
 

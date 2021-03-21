@@ -43,6 +43,16 @@ void functions_addresses_clean(FunctionsAddresses* fa);
 char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr);
 
 /*
+ * Gets the symbol associated to the function called by assembly: call *0x80....
+ * 
+ * @param tracee Path to the executable of the tracee.
+ * @param addr Address of instruction when the call occured.
+ * 
+ * @return Name of called function.
+ */
+char* function_address_get_symbol_deref(char* tracee, unsigned long addr);
+
+/*
  * Gets the address associated to the given symbol.
  * 
  * @param fa: pointer to the mapping.

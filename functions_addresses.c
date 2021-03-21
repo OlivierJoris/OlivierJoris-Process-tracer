@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static char first_call = 1;
+
 /*
  * Represents a node inside the linked list containing
  * the mappings.
@@ -232,6 +234,71 @@ char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr)
     }
 
     return NULL;
+}
+
+char* function_address_get_symbol_deref(char* tracee, unsigned long addr){
+    static char buffer[512];
+
+    if(first_call){
+        sprintf(buffer, "objdump -sS %s > dump_s.txt", tracee);
+        system(buffer);
+        first_call = 0;
+    }
+
+    // Find intermediate address
+    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%lx.*ff 15.*call.*\" | awk '{print $NF}' | grep -oE \"8.*\" > going_addr.txt", addr);
+    system(buffer);
+
+    FILE* f = fopen("going_addr.txt", "r");
+    if(!f)
+        return NULL;
+    unsigned long goingAddr = 0;
+    fscanf(f, "%lx", &goingAddr);
+    fclose(f);
+
+    // Find dest address
+    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%lx [0-9a-z]{8}[ ]{1}\" | awk '{print $2}' > going_addr.txt", goingAddr);
+    system(buffer);
+
+    f = fopen("going_addr.txt", "r");
+    if(!f)
+        return NULL;
+    char reachedAddr[10];
+    fscanf(f, "%s", reachedAddr);
+    fclose(f);
+
+    char* tmp = malloc(sizeof(char) * (strlen(reachedAddr) + 1));
+    if(!tmp)
+        return NULL;
+    unsigned int i = 0;
+    for(; i < strlen(reachedAddr); ++i){
+        if(i%2){
+            tmp[i] = reachedAddr[strlen(reachedAddr) - i];
+        }else{
+            tmp[i] = reachedAddr[strlen(reachedAddr) - 2 - i];
+        }
+    }
+    tmp[i] = '\0';
+
+    // Find name of function
+    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%s.*<.*>\" | awk '{print $2}' | grep -oE \"[^<]{1}.*[^>]{1}\" > func_name.txt", tmp);
+    system(buffer);
+    free(tmp);
+
+    f = fopen("func_name.txt", "r");
+    if(!f)
+        return NULL;
+    
+    char* funcName = calloc(256, sizeof(char));
+    if(!funcName){
+        fclose(f);
+        return NULL;
+    }
+
+    fscanf(f, "%s", funcName);
+    fclose(f);
+    
+    return funcName;
 }
 
 unsigned long function_addresses_get_addr(FunctionsAddresses* fa, char* symbol){
