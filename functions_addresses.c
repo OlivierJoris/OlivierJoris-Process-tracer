@@ -34,7 +34,27 @@ struct FunctionsAddresses_t {
  * 
  * @return The command to be executed.
  */
-static char* generate_command(char* exec);
+static char* generate_command_nm(char* exec);
+
+/*
+ * Generate the command (to retreive the mapping) between
+ * functions' addresses and symbols.
+ * 
+ * @param exec: path to the executable for which we want the mapping.
+ * 
+ * @return The command to be executed.
+ */
+static char* generate_command_objdump(char* exec);
+
+/*
+ * Creates a new cell of the list of mappings.
+ * 
+ * @param address Address of the function.
+ * @param symbolLength Length of function's symbol.
+ * 
+ * @return A new cell.
+ */
+static Mapping* create_new_cell(unsigned long address, unsigned long symbolLength);
 
 FunctionsAddresses* functions_addresses_load(char* exec){
     if(!exec){
@@ -42,16 +62,18 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
+    const int BUFFER_SIZE = 128;
+
     FunctionsAddresses* fa = malloc(sizeof(FunctionsAddresses));
     if(!fa)
         return NULL;
-    fa->first = malloc(sizeof(Mapping));
+    fa->first = create_new_cell(0, BUFFER_SIZE);
     if(!fa->first){
         functions_addresses_clean(fa);
         return NULL;
     }
 
-    char* command = generate_command(exec);
+    char* command = generate_command_nm(exec);
     if(!command){
         functions_addresses_clean(fa);
         return NULL;
@@ -65,37 +87,94 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
-    const int BUFFER_SIZE = 128;
-
     unsigned long address;
     char buffer[BUFFER_SIZE];
     Mapping* current = fa->first;
     while(fscanf(f, "%lx %s\n", &address, buffer) != -1){
         current->addr = address;
-        current->symbol = malloc(sizeof(char) * BUFFER_SIZE);
-        if(!current->symbol){
-            functions_addresses_clean(fa);
-            fclose(f);
-            return NULL;
-        }
         strcpy(current->symbol, buffer);
-        current->next = malloc(sizeof(Mapping));
+
+        current->next = create_new_cell(0, BUFFER_SIZE);
         if(!current->next){
             functions_addresses_clean(fa);
             fclose(f);
             return NULL;
         }
         current = current->next;
-        current->symbol = NULL;
         current->next = NULL;
     }
 
     fclose(f);
 
+    current = fa->first;
+    Mapping* prev = NULL;
+    char* command2 = generate_command_objdump(exec);
+    if(!command2)
+        return fa;
+
+    system(command2);
+    free(command2);
+
+    FILE* f2 = fopen("func_names.txt", "r");
+    if(!f2)
+        return fa;
+
+    while(fscanf(f2, "%lx %s\n", &address, buffer) != -1){
+        current = fa->first;
+        prev = NULL;
+        while(current != NULL){
+            if(current->addr == address) // Already have the mapping in memory
+                break;
+            // New cell at the beginning of the list
+            if(prev == NULL && address < current->addr){
+                Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
+                if(!newCell){
+                    fclose(f2);
+                    return fa;
+                }
+                strcpy(newCell->symbol, buffer);
+                Mapping* tmp = fa->first;
+                fa->first = newCell;
+                newCell->next = tmp;
+                break;
+            }
+            // New cell in the middle of the list
+            if(prev != NULL && address > prev->addr && address < current->addr){
+                Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
+                if(!newCell){
+                    fclose(f2);
+                    return fa;
+                }
+                strcpy(newCell->symbol, buffer);
+                newCell->next = prev->next;
+                prev->next = newCell;
+                break;
+            }
+
+            prev = current;
+            current = current->next;
+        }
+    }
+
+    fclose(f2);
+
     return fa;
 }
 
-static char* generate_command(char* exec){
+static Mapping* create_new_cell(unsigned long address, unsigned long symbolLength){
+    Mapping* newCell = malloc(sizeof(Mapping));
+    if(!newCell)
+        return NULL;
+    newCell->symbol = calloc(symbolLength, sizeof(char));
+    if(!newCell->symbol){
+        free(newCell);
+        return NULL;
+    }
+    newCell->addr = address;
+    return newCell;
+}
+
+static char* generate_command_nm(char* exec){
     if(!exec)
         return NULL;
 
@@ -104,6 +183,19 @@ static char* generate_command(char* exec){
         return NULL;
 
     sprintf(cmd, "nm -a --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
+
+    return cmd;
+}
+
+static char* generate_command_objdump(char* exec){
+    if(!exec)
+        return NULL;
+    
+    char* cmd = calloc(512, sizeof(char));
+    if(!cmd)
+        return NULL;
+    
+    sprintf(cmd, "objdump -d %s | grep -oE \"[0-9a-zA-Z: ]*call[ ]*[0-9a-z ]*<.*>\" | awk '{print $2 \" \"$3}' | sort | uniq > func_names.txt", exec);
 
     return cmd;
 }
