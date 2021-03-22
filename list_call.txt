@@ -1,338 +1,307 @@
- 80482f6:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8048793:	ff d0                	call   *%eax
- 80487cd:	ff d2                	call   *%edx
- 8048875:	ff d2                	call   *%edx
- 80489a3:	ff 16                	call   *(%esi)
- 8048a8a:	ff 54 24 60          	call   *0x60(%esp)
- 8048b22:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8049131:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80492e9:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80494a6:	ff 14 ad 6c af 0e 08 	call   *0x80eaf6c(,%ebp,4)
- 80494e6:	ff 14 ad 6c af 0e 08 	call   *0x80eaf6c(,%ebp,4)
- 8049530:	ff 14 9d 70 af 0e 08 	call   *0x80eaf70(,%ebx,4)
- 8049569:	ff d0                	call   *%eax
- 804a372:	ff d3                	call   *%ebx
- 804a37b:	ff d3                	call   *%ebx
- 804ab36:	ff d2                	call   *%edx
- 804adc5:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 804adf3:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 804ae8a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 804b0ca:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 804b0f0:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 804e3c2:	ff 16                	call   *(%esi)
- 804e3f9:	ff d2                	call   *%edx
- 804e421:	ff d2                	call   *%edx
- 804ef01:	ff 50 08             	call   *0x8(%eax)
- 804f108:	ff 50 30             	call   *0x30(%eax)
- 804f2ef:	ff 57 10             	call   *0x10(%edi)
- 804f35b:	ff 57 0c             	call   *0xc(%edi)
- 804f4a9:	ff 52 38             	call   *0x38(%edx)
- 804f517:	ff 50 0c             	call   *0xc(%eax)
- 804f686:	ff 50 0c             	call   *0xc(%eax)
- 804f715:	ff 50 0c             	call   *0xc(%eax)
- 804f760:	ff 52 0c             	call   *0xc(%edx)
- 804f9b7:	ff 50 48             	call   *0x48(%eax)
- 804f9ea:	ff 50 40             	call   *0x40(%eax)
- 804fb3c:	ff 50 40             	call   *0x40(%eax)
- 804fb87:	ff d3                	call   *%ebx
- 804fc1f:	ff 53 10             	call   *0x10(%ebx)
- 804fce0:	ff 53 10             	call   *0x10(%ebx)
- 804fdfd:	ff 53 40             	call   *0x40(%ebx)
- 804fe9b:	ff 50 40             	call   *0x40(%eax)
- 804ff95:	ff 50 40             	call   *0x40(%eax)
- 804fffe:	ff 53 18             	call   *0x18(%ebx)
- 805005d:	ff 50 40             	call   *0x40(%eax)
- 80500d6:	ff 53 04             	call   *0x4(%ebx)
- 805012c:	ff 53 18             	call   *0x18(%ebx)
- 80501df:	ff 56 0c             	call   *0xc(%esi)
- 8050392:	ff 50 04             	call   *0x4(%eax)
- 8050737:	ff 57 10             	call   *0x10(%edi)
- 8050750:	ff 51 40             	call   *0x40(%ecx)
- 80507d1:	ff 57 18             	call   *0x18(%edi)
- 8050afb:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8050c22:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8050dfb:	ff 50 40             	call   *0x40(%eax)
- 8050e2d:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8050f2c:	ff 50 3c             	call   *0x3c(%eax)
- 8050f8c:	ff 56 40             	call   *0x40(%esi)
- 80510ff:	ff 51 38             	call   *0x38(%ecx)
- 8051170:	ff 52 0c             	call   *0xc(%edx)
- 80512e1:	ff 50 48             	call   *0x48(%eax)
- 8051311:	ff 50 40             	call   *0x40(%eax)
- 80514c0:	ff 50 40             	call   *0x40(%eax)
- 80515db:	ff 50 40             	call   *0x40(%eax)
- 80516a7:	ff 51 40             	call   *0x40(%ecx)
- 80516ee:	ff d1                	call   *%ecx
- 80517ad:	ff 50 40             	call   *0x40(%eax)
- 805180d:	ff 50 40             	call   *0x40(%eax)
- 805187d:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80518c8:	ff 50 48             	call   *0x48(%eax)
- 8051b65:	ff 50 48             	call   *0x48(%eax)
- 8051d74:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8051eaf:	ff 50 20             	call   *0x20(%eax)
- 8051f60:	ff 52 38             	call   *0x38(%edx)
- 805210f:	ff 50 40             	call   *0x40(%eax)
- 805225b:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 805231c:	ff 50 0c             	call   *0xc(%eax)
- 80523c4:	ff 50 0c             	call   *0xc(%eax)
- 805242e:	ff 50 0c             	call   *0xc(%eax)
- 80524d1:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 805255d:	ff 50 40             	call   *0x40(%eax)
- 8052581:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8052603:	ff 50 24             	call   *0x24(%eax)
- 805277a:	ff 50 44             	call   *0x44(%eax)
- 8052cfa:	ff 50 44             	call   *0x44(%eax)
- 8052f6c:	ff 51 40             	call   *0x40(%ecx)
- 805370c:	ff 50 0c             	call   *0xc(%eax)
- 80539ff:	ff 50 34             	call   *0x34(%eax)
- 8053a6f:	ff 50 10             	call   *0x10(%eax)
- 8053b0c:	ff 50 0c             	call   *0xc(%eax)
- 8053c19:	ff 50 30             	call   *0x30(%eax)
- 8053cdc:	ff 52 24             	call   *0x24(%edx)
- 80540ab:	ff 50 18             	call   *0x18(%eax)
- 8054104:	ff 50 18             	call   *0x18(%eax)
- 805428b:	ff 50 0c             	call   *0xc(%eax)
- 8054435:	ff 50 2c             	call   *0x2c(%eax)
- 8054684:	ff 50 0c             	call   *0xc(%eax
- 8054bfd:	ff 93 98 00 00 00    	call   *0x98(%ebx)
- 8054c32:	ff 93 9c 00 00 00    	call   *0x9c(%ebx)
- 8054d45:	ff 95 98 00 00 00    	call   *0x98(%ebp)
- 8054d6c:	ff 95 9c 00 00 00    	call   *0x9c(%ebp)
- 8055078:	ff 93 9c 00 00 00    	call   *0x9c(%ebx)
- 80559fe:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 8055a29:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 8055fe9:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 8056009:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 8056028:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 80569e0:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8056a05:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8056a36:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8056f69:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 80571c2:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 80572bc:	ff 15 74 b9 0e 08    	call   *0x80eb974
- 8059626:	ff d2                	call   *%edx
- 806cb7a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ccc2:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806cce7:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ccff:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806cd7a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d3d5:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d41e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d44e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d48c:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d4b7:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d4fc:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d527:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d56c:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d597:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d5d5:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d620:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d65e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d710:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806d855:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806db38:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806de1f:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806df5d:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806dfc9:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806e00f:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806e042:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806e072:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806e0a7:	ff d6                	call   *%esi
- 806e0c4:	ff d6                	call   *%esi
- 806e0e1:	ff d6                	call   *%esi
- 806e0fe:	ff d6                	call   *%esi
- 806e138:	ff d6                	call   *%esi
- 806e2eb:	ff 54 24 48          	call   *0x48(%esp)
- 806e3fe:	ff d6                	call   *%esi
- 806e484:	ff 55 10             	call   *0x10(%ebp)
- 806e8de:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806e994:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806eab0:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806eb59:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ebd5:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ec46:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ec90:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ee7f:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806eecc:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806eefb:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ef6b:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806ef9a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 806f07e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807120d:	ff d6                	call   *%esi
- 8071283:	ff d6                	call   *%esi
- 8071417:	ff d6                	call   *%esi
- 8071515:	ff d3                	call   *%ebx
- 8071ac7:	ff d2                	call   *%edx
- 80731b9:	ff d5                	call   *%ebp
- 8073244:	ff d7                	call   *%edi
- 8073372:	ff d7                	call   *%edi
- 8073493:	ff d5                	call   *%ebp
- 80738f5:	ff d5                	call   *%ebp
- 8073984:	ff d6                	call   *%esi
- 8073b6c:	ff d7                	call   *%edi
- 8073c7d:	ff d5                	call   *%ebp
- 8073fa4:	ff d7                	call   *%edi
- 8074100:	ff d7                	call   *%edi
- 807428a:	ff d7                	call   *%edi
- 80749b3:	ff d3                	call   *%ebx
- 8075402:	ff d7                	call   *%edi
- 807577b:	ff d6                	call   *%esi
- 8076192:	ff d7                	call   *%edi
- 807636b:	ff d6                	call   *%esi
- 80766ea:	ff d7                	call   *%edi
- 807694c:	ff d6                	call   *%esi
- 8076ed2:	ff d7                	call   *%edi
- 8077094:	ff d6                	call   *%esi
- 807740a:	ff d7                	call   *%edi
- 807765c:	ff d6                	call   *%esi
- 8077db0:	ff d7                	call   *%edi
- 8077e6a:	ff d7                	call   *%edi
- 8078135:	ff d6                	call   *%esi
- 80781ae:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8078216:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8078338:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8078dd1:	ff d2                	call   *%edx
- 8079bcb:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079c55:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079ccb:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079ce5:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079d72:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079e51:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8079e9d:	ff d2                	call   *%edx
- 807a2dd:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807a414:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807a4ee:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807a550:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807a70d:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807ab4c:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807ab61:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807ac12:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807ad47:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 807ae4f:	ff d7                	call   *%edi
- 807ae65:	ff d7                	call   *%edi
- 807ae99:	ff d7                	call   *%edi
- 807aeba:	ff d7                	call   *%edi
- 807afee:	ff d7                	call   *%edi
- 807b09e:	ff d5                	call   *%ebp
- 807b215:	ff d7                	call   *%edi
- 807c11a:	ff 51 1c             	call   *0x1c(%ecx)
- 807c70b:	ff 14 82             	call   *(%edx,%eax,4)
- 807caa0:	ff 51 1c             	call   *0x1c(%ecx)
- 807cb54:	ff 14 91             	call   *(%ecx,%edx,4)
- 807ce94:	ff 50 1c             	call   *0x1c(%eax)
- 807d4e1:	ff 50 1c             	call   *0x1c(%eax)
- 807d9a1:	ff 50 1c             	call   *0x1c(%eax)
- 807db39:	ff 50 1c             	call   *0x1c(%eax)
- 807e155:	ff 50 1c             	call   *0x1c(%eax)
- 807eae5:	ff 50 1c             	call   *0x1c(%eax)
- 807f14f:	ff 50 1c             	call   *0x1c(%eax)
- 807f1d8:	ff 52 1c             	call   *0x1c(%edx)
- 807f312:	ff 50 1c             	call   *0x1c(%eax)
- 807f97b:	ff 50 1c             	call   *0x1c(%eax)
- 807fb0d:	ff 50 1c             	call   *0x1c(%eax)
- 8080856:	ff 50 1c             	call   *0x1c(%eax)
- 8080ceb:	ff 52 1c             	call   *0x1c(%edx)
- 80829db:	ff d2                	call   *%edx
- 8084f1a:	ff 51 1c             	call   *0x1c(%ecx)
- 80853f2:	ff 14 90             	call   *(%eax,%edx,4)
- 8085715:	ff d0                	call   *%eax
- 8085789:	ff 51 1c             	call   *0x1c(%ecx)
- 8085844:	ff 14 82             	call   *(%edx,%eax,4)
- 80861c2:	ff 50 1c             	call   *0x1c(%eax)
- 80866db:	ff 50 1c             	call   *0x1c(%eax)
- 80868fd:	ff 50 1c             	call   *0x1c(%eax)
- 8086d66:	ff 50 1c             	call   *0x1c(%eax)
- 8087fce:	ff 50 1c             	call   *0x1c(%eax)
- 80885ea:	ff 50 1c             	call   *0x1c(%eax)
- 8088676:	ff 52 1c             	call   *0x1c(%edx)
- 8088845:	ff 50 1c             	call   *0x1c(%eax)
- 80894bf:	ff 50 1c             	call   *0x1c(%eax)
- 8089a9f:	ff 50 1c             	call   *0x1c(%eax)
- 808a187:	ff 52 1c             	call   *0x1c(%edx)
- 808aa9f:	ff d2                	call   *%edx
- 808aea4:	ff 50 48             	call   *0x48(%eax)
- 808aff8:	ff 50 1c             	call   *0x1c(%eax)
- 808b1c5:	ff 50 1c             	call   *0x1c(%eax)
- 808b76d:	ff 50 1c             	call   *0x1c(%eax)
- 808b798:	ff 50 1c             	call   *0x1c(%eax)
- 808b80d:	ff 50 1c             	call   *0x1c(%eax)
- 808b838:	ff 50 1c             	call   *0x1c(%eax)
- 808bd7f:	ff 50 10             	call   *0x10(%eax)
- 808bf0f:	ff 50 34             	call   *0x34(%eax)
- 808bfec:	ff 50 0c             	call   *0xc(%eax)
- 808c396:	ff 52 18             	call   *0x18(%edx)
- 808c3fc:	ff 50 18             	call   *0x18(%eax)
- 808c69f:	ff d3                	call   *%ebx
- 808c752:	ff d3                	call   *%ebx
- 808c7ff:	ff d3                	call   *%ebx
- 808c8c3:	ff d3                	call   *%ebx
- 808e942:	ff d7                	call   *%edi
- 808e9e5:	ff d3                	call   *%ebx
- 808eadb:	ff d3                	call   *%ebx
- 808eb69:	ff d3                	call   *%ebx
- 808ecf4:	ff d3                	call   *%ebx
- 808ee07:	ff d3                	call   *%ebx
- 808f06e:	ff d6                	call   *%esi
- 808f1bc:	ff d6                	call   *%esi
- 808f50a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80916f8:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091778:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80917b7:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091817:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 809187c:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091a14:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c1b:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c35:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c45:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c55:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c65:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091c7e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091cbe:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091d02:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091d2f:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091d65:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091d8b:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091deb:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091e8a:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091ecc:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8091ef7:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80939d7:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8093cea:	ff 15 f4 b9 0e 08    	call   *0x80eb9f4
- 80959ba:	ff d2                	call   *%edx
- 8095e22:	ff 93 74 ba 0e 08    	call   *0x80eba74(%ebx)
- 809682e:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 8096fa4:	ff 15 0c ba 0e 08    	call   *0x80eba0c
- 8099387:	ff 15 30 bf 0e 08    	call   *0x80ebf30
- 80994e6:	ff d3                	call   *%ebx
- 8099578:	ff 15 30 bf 0e 08    	call   *0x80ebf30
- 80995b2:	ff 94 24 f0 00 00 00 	call   *0xf0(%esp)
- 8099621:	ff 15 30 bf 0e 08    	call   *0x80ebf30
- 8099649:	ff d2                	call   *%edx
- 8099770:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 809a35c:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 809a4f0:	ff 15 64 cc 0e 08    	call   *0x80ecc64
- 809a54e:	ff 15 64 cc 0e 08    	call   *0x80ecc64
- 809b1e4:	ff 15 0c ba 0e 08    	call   *0x80eba0c
- 809b938:	ff 54 be fc          	call   *-0x4(%esi,%edi,4)
- 809b94d:	ff d2                	call   *%edx
- 809c1bf:	ff 15 64 cc 0e 08    	call   *0x80ecc64
- 809c395:	ff 13                	call   *(%ebx)
- 809ef23:	ff d2                	call   *%edx
- 809f0e9:	ff d2                	call   *%edx
- 809fdad:	ff 94 24 e4 00 00 00 	call   *0xe4(%esp)
- 809ffaf:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 809fff1:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80a1141:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80a12e0:	ff d5                	call   *%ebp
- 80a132d:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80a1421:	ff 14 af             	call   *(%edi,%ebp,4)
- 80a1581:	ff 14 b3             	call   *(%ebx,%esi,4)
- 80a19b0:	ff 54 be fc          	call   *-0x4(%esi,%edi,4)
- 80a9701:	ff d5                	call   *%ebp
- 80a9c0f:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80b64f2:	ff 15 f0 b9 0e 08    	call   *0x80eb9f0
- 80b8ee7:	ff 55 08             	call   *0x8(%ebp)
- 80ba24f:	ff d5                	call   *%ebp
- 80baf87:	ff 54 24 70          	call   *0x70(%esp)
- 80bb2d3:	ff d3                	call   *%ebx
- 80bb7d7:	ff d2                	call   *%edx
+0f 83 00
+0f 84 00
+0f 84 ff
+0f 85 00
+0f 85 ff
+0f 86 00
+0f 86 ff
+0f 87 00
+74 01 
+74 07 
+74 0c 
+74 15 
+74 1f 
+74 46 
+74 57 
+74 d6 
+75 05 
+75 0c 
+75 15 
+76 19 
+e8 00 call
+e8 01 call
+e8 02 call
+e8 03 call
+e8 04 call
+e8 05 call
+e8 06 call
+e8 07 call
+e8 08 call
+e8 09 call
+e8 0a call
+e8 0b call
+e8 0c call
+e8 0d call
+e8 0e call
+e8 0f call
+e8 10 call
+e8 11 call
+e8 12 call
+e8 13 call
+e8 14 call
+e8 15 call
+e8 16 call
+e8 17 call
+e8 18 call
+e8 19 call
+e8 1a call
+e8 1b call
+e8 1c call
+e8 1d call
+e8 1e call
+e8 1f call
+e8 20 call
+e8 21 call
+e8 22 call
+e8 23 call
+e8 24 call
+e8 25 call
+e8 26 call
+e8 27 call
+e8 28 call
+e8 29 call
+e8 2a call
+e8 2b call
+e8 2c call
+e8 2d call
+e8 2e call
+e8 2f call
+e8 30 call
+e8 31 call
+e8 32 call
+e8 33 call
+e8 34 call
+e8 35 call
+e8 36 call
+e8 37 call
+e8 38 call
+e8 39 call
+e8 3a call
+e8 3b call
+e8 3c call
+e8 3d call
+e8 3e call
+e8 3f call
+e8 40 call
+e8 43 call
+e8 44 call
+e8 45 call
+e8 46 call
+e8 47 call
+e8 48 call
+e8 49 call
+e8 4a call
+e8 4b call
+e8 4c call
+e8 4d call
+e8 4e call
+e8 4f call
+e8 50 call
+e8 51 call
+e8 52 call
+e8 53 call
+e8 54 call
+e8 55 call
+e8 56 call
+e8 57 call
+e8 58 call
+e8 59 call
+e8 5a call
+e8 5b call
+e8 5c call
+e8 5d call
+e8 5e call
+e8 5f call
+e8 60 call
+e8 61 call
+e8 62 call
+e8 63 call
+e8 64 call
+e8 65 call
+e8 66 call
+e8 67 call
+e8 68 
+e8 68 call
+e8 69 call
+e8 6a call
+e8 6b call
+e8 6c call
+e8 6d call
+e8 6e call
+e8 6f call
+e8 70 call
+e8 71 call
+e8 72 call
+e8 73 call
+e8 74 call
+e8 75 call
+e8 76 call
+e8 77 call
+e8 78 call
+e8 79 call
+e8 7a call
+e8 7b call
+e8 7c call
+e8 7d call
+e8 7e call
+e8 7f call
+e8 80 call
+e8 81 call
+e8 82 call
+e8 83 call
+e8 84 call
+e8 85 call
+e8 86 call
+e8 87 call
+e8 88 call
+e8 89 call
+e8 8a call
+e8 8b call
+e8 8c call
+e8 8d call
+e8 8e call
+e8 8f call
+e8 90 call
+e8 91 call
+e8 92 call
+e8 93 call
+e8 94 call
+e8 95 call
+e8 96 call
+e8 97 call
+e8 98 call
+e8 99 call
+e8 9a call
+e8 9b call
+e8 9c call
+e8 9e call
+e8 9f call
+e8 a0 call
+e8 a1 call
+e8 a2 call
+e8 a3 call
+e8 a4 call
+e8 a5 call
+e8 a6 call
+e8 a7 call
+e8 a8 call
+e8 a9 call
+e8 aa call
+e8 ab call
+e8 ac call
+e8 ad call
+e8 ae call
+e8 af call
+e8 b0 call
+e8 b1 call
+e8 b2 call
+e8 b3 call
+e8 b4 call
+e8 b5 call
+e8 b6 call
+e8 b7 call
+e8 b8 call
+e8 b9 call
+e8 ba call
+e8 bb call
+e8 bc call
+e8 bd call
+e8 be call
+e8 bf call
+e8 c0 call
+e8 c1 call
+e8 c2 call
+e8 c3 call
+e8 c4 call
+e8 c5 call
+e8 c6 call
+e8 c7 call
+e8 c8 call
+e8 c9 call
+e8 ca call
+e8 cb call
+e8 cc call
+e8 cd call
+e8 ce call
+e8 cf call
+e8 d0 call
+e8 d1 call
+e8 d2 call
+e8 d3 call
+e8 d4 call
+e8 d5 call
+e8 d6 call
+e8 d7 call
+e8 d8 call
+e8 d9 call
+e8 da call
+e8 db call
+e8 dc call
+e8 dd call
+e8 de call
+e8 df call
+e8 e1 call
+e8 e2 call
+e8 e3 call
+e8 e4 call
+e8 e5 call
+e8 e6 call
+e8 e7 call
+e8 e8 call
+e8 e9 call
+e8 ea call
+e8 eb call
+e8 ec call
+e8 ed call
+e8 ee call
+e8 ef call
+e8 f0 call
+e8 f1 call
+e8 f2 call
+e8 f3 call
+e8 f4 call
+e8 f5 call
+e8 f6 call
+e8 f7 call
+e8 f8 call
+e8 f9 call
+e8 fa call
+e8 fb call
+e8 fc call
+e8 fd call
+e8 fe call
+e8 ff call
+e9 02 jmp
+e9 05 jmp
+e9 2a jmp
+e9 37 jmp
+e9 42 jmp
+e9 4a jmp
+e9 53 jmp
+e9 5a jmp
+e9 5f jmp
+e9 60 jmp
+e9 7e jmp
+e9 89 jmp
+e9 d1 jmp
+e9 d2 jmp
+e9 ef jmp
+ff 14 0e
+ff 15 08
+ff 16 
+ff 50 
+ff 51 
+ff 52 
+ff 53 
+ff 54 *0x48(%esp)
+ff 54 *0x60(%esp)
+ff 55 
+ff 56 
+ff 57 
+ff 93 00
+ff 95 00
+ff d0 
+ff d1 
+ff d2 
+ff d3 
+ff d6 

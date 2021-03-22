@@ -99,7 +99,7 @@ static void func_call_print(Func_call* fc);
  * 
  * @param fc Function to print.
  */
-static void func_call_print_unqiue(Func_call* fc);
+static void func_call_print_unique(Func_call* fc);
 
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
@@ -184,12 +184,12 @@ static void trace_function_calls(Profiler* profiler){
             if(!symbol){
                 if(nextIsDeref){
                     symbolDeref = function_address_get_symbol_deref(profiler->tracee, comingAddr);
-                    printf("%s\n", symbolDeref);
+                    printf("%s | %lu\n", symbolDeref, depth);
                     nextIsDeref = 0;
                 }
             }
             else
-                printf("%s\n", symbol);
+                printf("%s | %lu\n", symbol, depth);
 
             // Updates number of instructions recursively
             Func_call* tmp_prev = currNode;
@@ -264,7 +264,7 @@ static void trace_function_calls(Profiler* profiler){
         }
 
         // Opcodes for RET
-        if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode == 0xc9 || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
+        if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
             nbRets++;
             if(depth > 0)
                 depth-=1;
@@ -380,25 +380,25 @@ void func_call_print(Func_call* fc){
     
     Func_call* tmp = fc;
     while(tmp != NULL){
-        func_call_print_unqiue(tmp);
+        func_call_print_unique(tmp);
         if(tmp->children)
             func_call_print(tmp->children);
         tmp = tmp->next;
     }
 }
 
-void func_call_print_unqiue(Func_call* fc){
+void func_call_print_unique(Func_call* fc){
     if(!fc)
-        printf("func_call_print_unqiue: null ptr!");
+        printf("func_call_print_unique: null ptr!");
     for(unsigned int i = 0; i < NB_BLANKS * fc->depth; ++i)
         printf(" ");
     if(fc->name)
         printf("%s", fc->name);
     else
-        printf("func_call_print_unqiue: unable to get name!\n");
+        printf("func_call_print_unique: unable to get name!\n");
     if(fc->nbRecCalls != 0)
         printf(" [rec call: %u]", fc->nbRecCalls);
-    printf(": %u | %u\n", fc->nbInstr, fc->nbInstrChild);
+    printf(": %u | %u | depth = %u\n", fc->nbInstr, fc->nbInstrChild, fc->depth);
 
     return;
 }
