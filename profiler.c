@@ -141,9 +141,8 @@ static void trace_function_calls(Profiler* profiler){
 
     int status;
     struct user_regs_struct userRegs;
-    bool nextIsCallee = false;
-    bool running = true;
-    unsigned long depth = 0, prevLocalDepth = 0, nbCalls = 0, nbRets = 0;
+    bool nextIsCallee = false, nextIsDeref = false;
+    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, nbCalls = 0, nbRets = 0, comingAddr;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes - 2^16-1
@@ -151,20 +150,16 @@ static void trace_function_calls(Profiler* profiler){
     // Used to get opcode on 2 bytes excluding 3d hex digit.
     const unsigned long PREFIX3 = 61695;
 
-    bool nextIsDeref = false;
-    unsigned long comingAddr;
-
     profiler->entryPoint = func_call_create_node();
     if(!profiler->entryPoint)
         return;
     
     Func_call* currNode = profiler->entryPoint;
-    unsigned int prevDepth;
     char* prevFuncName = calloc(256, sizeof(char));
     if(!prevFuncName)
         return;
 
-    while(running){
+    while(true){
         wait(&status);
         if(WIFEXITED(status))
             break;
@@ -176,20 +171,20 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, userRegs.eip, NULL);
 
         if(nextIsCallee){
-            nbCalls++;
+            nbCalls++; // MUST BE REMOVED
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
             char* symbolDeref;
-            for(unsigned long i = 0; i < NB_BLANKS * depth; i++)
-                printf(" ");
+            for(unsigned long i = 0; i < NB_BLANKS * depth; i++)    // MUST BE REMOVED
+                printf(" ");    // MUST BE REMOVED
             if(!symbol){
-                if(nextIsDeref){
+                if(nextIsDeref){ // call *0x80...
                     symbolDeref = function_address_get_symbol_deref(profiler->tracee, comingAddr);
-                    printf("%s | %lu\n", symbolDeref, depth);
-                    nextIsDeref = 0;
+                    printf("%s | %lu\n", symbolDeref, depth);   // MUST BE REMOVED
+                    nextIsDeref = false;
                 }
             }
             else
-                printf("%s | %lu\n", symbol, depth);
+                printf("%s | %lu\n", symbol, depth);    // MUST BE REMOVED
 
             // Updates number of instructions recursively
             Func_call* tmp_prev = currNode;
@@ -242,7 +237,6 @@ static void trace_function_calls(Profiler* profiler){
             }
             prevLocalDepth = depth;
             currNode = tmp_next;
-
             nextIsCallee = false;
             depth+=1;
         }
@@ -258,14 +252,14 @@ static void trace_function_calls(Profiler* profiler){
         if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff){
             nextIsCallee = true;
             if(opcode2 == 0x15ff){
-                nextIsDeref = true;
+                nextIsDeref = true; // call *0x80...
                 comingAddr = userRegs.eip;
             }
         }
 
         // Opcodes for RET
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
-            nbRets++;
+            nbRets++; // MUST BE REMOVED
             if(depth > 0)
                 depth-=1;
         }
@@ -291,7 +285,7 @@ static void trace_function_calls(Profiler* profiler){
 
     free(prevFuncName);
 
-    printf("\n\n** Nb calls = %lu | nb rets = %lu **\n", nbCalls, nbRets);
+    printf("\n\n** Nb calls = %lu | nb rets = %lu **\n", nbCalls, nbRets); // MUST BE REMOVED
 
     functions_addresses_clean(fa);
 
