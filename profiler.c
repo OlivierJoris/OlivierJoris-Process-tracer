@@ -134,6 +134,7 @@ Profiler* run_profiler(char* tracee){
 static void trace_function_calls(Profiler* profiler){
     if(!profiler)
         return;
+
     FunctionsAddresses* fa = functions_addresses_load(profiler->tracee);
     if(!fa)
         return;
@@ -159,6 +160,9 @@ static void trace_function_calls(Profiler* profiler){
     
     Func_call* currNode = profiler->entryPoint;
     unsigned int prevDepth;
+    char* prevFuncName = calloc(256, sizeof(char));
+    if(!prevFuncName)
+        return;
 
     while(running){
         wait(&status);
@@ -202,32 +206,40 @@ static void trace_function_calls(Profiler* profiler){
 
             // Update structure of the tree
             Func_call* tmp_next;
-            // Need to update next field.
-            if(depth == currNode->depth || depth == currNode->depth - 1){
-                if(depth == currNode->depth - 1){
-                    while(currNode->depth > depth) // Go back until we reach same depth
-                        currNode = currNode->prev;
+            // Recursive
+            if(prevFuncName && symbol && !strcmp(symbol, prevFuncName)){
+                currNode->nbRecCalls+=1;
+                tmp_next = currNode;
+            }else{
+                // Need to update next field.
+                if(depth == currNode->depth || depth == currNode->depth - 1){
+                    if(depth == currNode->depth - 1){
+                        // Go back until we reach same depth
+                        while(currNode->depth > depth)
+                            currNode = currNode->prev;
+                    }
+
+                    currNode->next = func_call_create_node();
+                    if(!currNode->next)
+                        return;
+                    tmp_next = currNode->next;
+                }else{
+                    // Need to update children field.
+                    currNode->children = func_call_create_node();
+                    if(!currNode->children)
+                        return;
+                    tmp_next = currNode->children;
                 }
-
-                currNode->next = func_call_create_node();
-                if(!currNode->next)
-                    return;
-                tmp_next = currNode->next;
-            }else{
-                // Need to update children field.
-                currNode->children = func_call_create_node();
-                if(!currNode->children)
-                    return;
-                tmp_next = currNode->children;
+                if(symbol != NULL){
+                    func_call_set(tmp_next, currNode, depth, symbol);
+                    strcpy(prevFuncName, symbol);
+                }else{
+                    func_call_set(tmp_next, currNode, depth, symbolDeref);
+                    strcpy(prevFuncName, symbolDeref);
+                    free(symbolDeref);
+                    symbolDeref = NULL;
+                }
             }
-
-            if(symbol != NULL){ // After bugs solved, only symbol (not buffer)
-                func_call_set(tmp_next, currNode, depth, symbol);
-            }else{
-                func_call_set(tmp_next, currNode, depth, symbolDeref);
-                free(symbolDeref);
-            }
-            
             currNode = tmp_next;
 
             nextIsCallee = false;
@@ -248,7 +260,6 @@ static void trace_function_calls(Profiler* profiler){
                 nextIsDeref = true;
                 comingAddr = userRegs.eip;
             }
-            //printf("%lx | %lx | ", instr, userRegs.eip);
         }
 
         // Opcodes for RET
@@ -276,6 +287,8 @@ static void trace_function_calls(Profiler* profiler){
             prevDepth = tmp_prev->depth;
         }
     }
+
+    free(prevFuncName);
 
     printf("\n\n** Nb calls = %lu | nb rets = %lu **\n", nbCalls, nbRets);
 
@@ -379,9 +392,12 @@ void func_call_print_unqiue(Func_call* fc){
     for(unsigned int i = 0; i < NB_BLANKS * fc->depth; ++i)
         printf(" ");
     if(fc->name)
-        printf("%s: %u | %u\n", fc->name, fc->nbInstr, fc->nbInstrChild);
+        printf("%s", fc->name);
     else
         printf("func_call_print_unqiue: unable to get name!\n");
+    if(fc->nbRecCalls != 0)
+        printf(" [rec call: %u]", fc->nbRecCalls);
+    printf(": %u | %u\n", fc->nbInstr, fc->nbInstrChild);
 
     return;
 }
