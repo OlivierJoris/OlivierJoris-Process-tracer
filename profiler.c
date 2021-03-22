@@ -143,7 +143,7 @@ static void trace_function_calls(Profiler* profiler){
     struct user_regs_struct userRegs;
     bool nextIsCallee = false;
     bool running = true;
-    unsigned long depth = 0, nbCalls = 0, nbRets = 0;
+    unsigned long depth = 0, prevLocalDepth = 0, nbCalls = 0, nbRets = 0;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes - 2^16-1
@@ -207,7 +207,7 @@ static void trace_function_calls(Profiler* profiler){
             // Update structure of the tree
             Func_call* tmp_next;
             // Recursive
-            if(prevFuncName && symbol && !strcmp(symbol, prevFuncName)){
+            if(prevFuncName && depth == prevLocalDepth + 1 && symbol && !strcmp(symbol, prevFuncName)){
                 currNode->nbRecCalls+=1;
                 tmp_next = currNode;
             }else{
@@ -240,6 +240,7 @@ static void trace_function_calls(Profiler* profiler){
                     symbolDeref = NULL;
                 }
             }
+            prevLocalDepth = depth;
             currNode = tmp_next;
 
             nextIsCallee = false;
