@@ -10,11 +10,11 @@
 #include "file_sys_calls.h"
 
 /*
- * Trace the syscalls of the given tracee.
+ * Traces the syscalls of the given tracee.
  * 
- * @param tracee: path to the executable of the tracee.
- * @param fsc: pointer to FileSysCalls containing the mapping
- * between system call ids and names.
+ * @param tracee Path to the executable of the tracee.
+ * @param fsc Pointer to FileSysCalls containing the mapping
+ * between system calls' ids and names.
  * 
  * @return EXIT_SUCCESS If no error.
  *         EXIT_FAILURE Else.

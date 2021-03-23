@@ -21,45 +21,35 @@
 /*
  * Checks if a system call has occured in the tracee process.
  * 
- * @param tracee: pid of the process running the tracee.
+ * @param tracee PID of the process running the tracee.
  * 
  * @return true If a syscall has been detected in the tracee.
  *         false If the tracee exited.
  */
 static bool is_syscall(pid_t tracee);
 
-int trace_syscalls(char *tracee, FileSysCalls *fsc)
-{
+int trace_syscalls(char *tracee, FileSysCalls *fsc){
     pid_t traceePID = fork();
 
-    if(traceePID < 0)
-    {
+    if(traceePID < 0){
         fprintf(stderr, "Failed forking process !\n");
         return EXIT_FAILURE;
-    }
-
-    else 
-    {
-        if(traceePID == 0)
-        {
+    }else {
+        if(traceePID == 0){
             char* argv[] = {NULL};
             char* env[] = {NULL};
 
             ptrace(PTRACE_TRACEME, 0, NULL, NULL);
             close(1);
             return execve(tracee, argv, env);
-        }
-
-        else 
-        {
+        }else{
             int status;
             unsigned int syscallNumber;
 
             waitpid(traceePID, &status, 0);
             ptrace(PTRACE_SETOPTIONS, traceePID, NULL, PTRACE_O_TRACESYSGOOD);
 
-            while(true) 
-            {
+            while(true){
                 if(!is_syscall(traceePID)) 
                     break;
 
@@ -77,12 +67,10 @@ int trace_syscalls(char *tracee, FileSysCalls *fsc)
     }
 }
 
-static bool is_syscall(pid_t traceePID)
-{
+static bool is_syscall(pid_t traceePID){
     int status;
 
-    while(true) 
-    {
+    while(true){
         ptrace(PTRACE_SYSCALL, traceePID, NULL, NULL);
         waitpid(traceePID, &status, 0);
 
