@@ -1,0 +1,135 @@
+\documentclass[a4paper, 11pt, oneside]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{array}
+\usepackage{shortvrb}
+\usepackage{listings}
+\usepackage[fleqn]{amsmath}
+\usepackage{amsfonts}
+\usepackage{fullpage}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{alltt}
+\usepackage{indentfirst}
+\usepackage{eurosym}
+\usepackage{listings}
+\usepackage{titlesec, blindtext, color}
+\usepackage{float}
+\usepackage[colorlinks, linkcolor=blue]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{pink1}{rgb}{0.858, 0.188, 0.478}
+\definecolor{sienna}{rgb}{0.53, 0.18, 0.09}
+\definecolor{sepia}{rgb}{0.44, 0.26, 0.08}
+\definecolor{midnightblue}{rgb}{0.1, 0.1, 0.44}
+
+\renewcommand{\lstlistingname}{Code}
+
+\lstset{
+    language=C, % Utilisation du langage C
+    commentstyle={\color{MidnightBlue}}, % Couleur des commentaires
+    frame=single, % Entoure le code d'un joli cadre
+    rulecolor=\color{black}, % Couleur de la ligne qui forme le cadre
+    numbers=left, % Ajoute une numérotation des lignes à gauche
+    numbersep=5pt, % Distance entre les numérots de lignes et le code
+    numberstyle=\tiny\color{mygray}, % Couleur des numéros de lignes
+    basicstyle=\tt\footnotesize, 
+    tabsize=3, % Largeur des tabulations par défaut
+    extendedchars=true, 
+    captionpos=b, % sets the caption-position to bottom
+    texcl=true, % Commentaires sur une ligne interprétés en Latex
+    showstringspaces=false, % Ne montre pas les espace dans les chaines de caractères
+    escapeinside={(>}{<)}, % Permet de mettre du latex entre des <( et )>.
+    inputencoding=utf8,
+    literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\`E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\euro}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+  {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+}
+
+
+\newcommand{\ClassName}{INFO-0940: Operating Systems}
+\newcommand{\ProjectName}{Project 1: Tracer - Report}
+\newcommand{\AcademicYear}{2020 - 2021}
+
+%%%% Page de garde %%%%
+
+\title{\ClassName\\\vspace*{0.8cm}\ProjectName\vspace{0.8cm}}
+\author{Goffart Maxime \\180521 \and Joris Olivier \\ 182113}
+\date{\vspace{1cm}Academic year \AcademicYear}
+
+\begin{document}
+
+%%% Page de garde %%%
+\begin{titlingpage}
+{\let\newpage\relax\maketitle}
+\end{titlingpage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Implementation}
+\paragraph{}In this section, we will present our implementation. We will start with the structure of the code. Then, we will briefly explained the data structures that we are using.
+
+\subsection{Code structure}
+\paragraph{}Our implementation is composed of multiple source and header files. Our files are the following:
+\begin{itemize}
+	\item \texttt{tracer.c} The file which contains the main function of the tracer. Based on the arguments given, it starts the adequate mode (profiler or syscall).
+	\item \texttt{syscall\{.c,.h\}} Represents the mode of the program that traces the system calls made by the tracee.
+	\item \texttt{profiler\{.c,.h\}} Represents the mode of the program that traces the function calls made by the tracee.
+	\item \texttt{file\_sys\_calls\{.c,.h\}} Represents the module that allows to load the file that contains the mapping between the ids and the names of the system calls.
+	\item \texttt{functions\_addresses\{.c,.h\}} Represents the module that allows to load the mapping between the functions' names and their addresses. It requires nm and objdump to work.
+	\item \texttt{load\_param\{.c,.h\}} Represents the module that allows to parse the arguments of the program.
+\end{itemize}
+
+\subsection{Data structures}
+\paragraph{}Throughout the project, we are using multiple data structures. Here is a list of the data structure that we are using:
+\begin{itemize}
+	\item In \texttt{profiler\{.c,.h\}}, we have:
+		\begin{itemize}
+			\item \texttt{Profiler} represents the data of the profiler. After running \texttt{run\_profiler(char*)}, it contains the data of the profiling.
+			\item \texttt{Func\_call} represents a function called by the tracee. An explanation of the different fields is available in the source file.
+		\end{itemize}
+	\item In \texttt{file\_sys\_calls\{.c,.h\}}, we have \texttt{FileSysCalls} which represents the mapping between the system calls' names and ids.
+	\item In \texttt{functions\_addresses\{.c,.h\}}, we have:
+		\begin{itemize}
+			\item \texttt{FunctionAddresses} which represents, as a linked list of \texttt{Mapping}, the mapping the between the functions' symbols and addresses.
+			\item \texttt{Mapping} which represents, as a node of a linked list, a mapping between a function's symbol and address.
+		\end{itemize}
+\end{itemize}
+
+\section{Specific questions}
+\paragraph{}In this section, we will answer to the questions asked in the section 6 of the assignment.
+\begin{enumerate}
+	\item \textbf{What are the opcodes that you have used to detect the \texttt{call} and \texttt{ret} insturctions?}\\
+	To detect the \texttt{call} instruction, we used the opcodes: 0xe8, 0x9a, 0xffd\textit{x}, 0xff1\textit{x}, 0xff5\textit{x}, and 0xff9\textit{x} where \textit{x} is an hexadecimal digit.\\
+	To detect the \texttt{ret} instruction, we used the opcodes: 0xc2, 0xc3, 0xca, 0xcb, 0xf3c3, and 0xf2c3.
+	\item \textbf{Why are there many functions called before the "real" program and what is/are their purpose(s)?}\\
+	Their purposes are to set everything in order for the process to be runnable (call to \_\_libc\_start\_main) including setting up the thread inside the process (call to\\\_\_pthread\_initialize\_minimal).
+	\item \textbf{According to you, what is the reason for statically compiling the "tracee" program?}\\
+	In order to get the functions' names (including the ones from libraries), we are using nm and objdump. These two programs rely on the ELF file generated by the compilation process\footnote{Here, by compilation process, we mean preprocessing, compiling, assembly, \textbf{and} linking.}. Yet, dynamic libraries are loaded at runtime where static libraries are integrated in the executable during the linking phase. Because we need the functions from libraries to be in the executable, due to the usage of nm and objdump, it forces us to use static libraries, which themselves implies static linking.
+\end{enumerate}
+
+\section{Estimation of spent time}
+\paragraph{}Unfortunately, we were working, at the same time, on other projects, so we do not have a clear idea of how much time we spent on this project in particular.
+
+
+\end{document}
