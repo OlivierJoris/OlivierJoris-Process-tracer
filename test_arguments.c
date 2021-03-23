@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv)
-{
-    LaunchMode lm = load_arguments(argc, argv);
+int main(int argc, char **argv){
+    Mode lm = load_arguments(argc, argv);
     switch (lm){
         case profiler:
             printf("Detected profiler mode\n");

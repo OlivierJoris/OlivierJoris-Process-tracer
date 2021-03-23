@@ -1,4 +1,10 @@
-#include "util.h"
+/*
+ * Module implementing the tracer.
+ * 
+ * @author Maxime Goffart (180521) & Olivier Joris (182113)
+ */
+
+#include "load_param.h"
 #include "profiler.h"
 #include "functions_addresses.h"
 #include "syscall.h"
@@ -7,30 +13,35 @@
 
 int main(int argc, char* argv[]){
 
-    LaunchMode lm = load_arguments(argc, argv);
+    Mode lm = load_arguments(argc, argv);
 
     switch (lm){
-        case profiler:
-            printf("Detected profiler mode\n");
-            Profiler* profiler = run_profiler(argv[2]);
-            profiler_display_data(profiler);
-            profiler_clean(profiler);
-
+        case profiler:{
+            Profiler* p = run_profiler(argv[2]);
+            if(!p){
+                fprintf(stderr, "Error while running profiler!\n");
+                return -1;
+            }
+            profiler_display_data(p);
+            profiler_clean(p);
             break;
-        case syscall:
-            printf("Detected syscall mode\n");
-            FileSysCalls *fsc = load_file();
-            if(trace_syscalls(argv[2], fsc) == 0)
-            {
+        }
+
+        case syscall:{
+            FileSysCalls* fsc = load_file();
+            if(!fsc){
+                fprintf(stderr, "Syscall: unable to load the mapping!\n");
+                return -1;
+            }
+            if(trace_syscalls(argv[2], fsc) == EXIT_SUCCESS){
                 sys_calls_file_free(fsc);
                 break;
-            }
-                
-            else
-            {
+            }else{
                 sys_calls_file_free(fsc);
                 return -1;
             }
+        }
+
         case error:
             fprintf(stderr, "Error while parsing arguments!\n");
             return -1;

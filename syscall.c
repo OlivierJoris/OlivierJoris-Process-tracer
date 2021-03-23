@@ -5,6 +5,7 @@
  */
 
 #include "syscall.h"
+#include "file_sys_calls.h"
 
 #include <stdlib.h>
 #include <stdio.h>
