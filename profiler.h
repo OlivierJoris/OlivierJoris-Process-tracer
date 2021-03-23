@@ -7,13 +7,17 @@
 #ifndef __PROFILER__
 #define __PROFILER__
 
+/*
+ * Represents the data of the profiler.
+ */
 typedef struct Profiler_t Profiler;
 
 /*
- * Runs the profiler on the given tracee. Need to call profiler_clean()
- * after usage.
+ * Runs the profiler on the given tracee.
  * 
- * @param tracee: path to the executable of the tracee.
+ * @warning: Need to call profiler_clean() after usage.
+ * 
+ * @param tracee Path to the executable of the tracee.
  * 
  * @return Data of the profiling of the given tracee.
  */
@@ -22,7 +26,7 @@ Profiler* run_profiler(char* tracee);
 /*
  * Cleans the profiling data.
  * 
- * @param profiler: data of the profiling of the tracee.
+ * @param profiler Data of the profiling of the tracee.
  */
 void profiler_clean(Profiler* profiler);
 
@@ -32,7 +36,7 @@ void profiler_clean(Profiler* profiler);
  * 
  * @warning: must call run_profiler(char*) before.
  * 
- * @param profiler: data of the profiling of the tracee.
+ * @param profiler Data of the profiling of the tracee.
  */
 void profiler_display_data(Profiler* profiler);
 

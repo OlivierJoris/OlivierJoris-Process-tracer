@@ -19,7 +19,7 @@
 
 /*
  * Number of spaces representing a level of depth
- * inside the tree.
+ * inside the call tree.
  */
 #define NB_BLANKS 4
 
@@ -33,7 +33,7 @@ struct Func_call_t{
     unsigned int nbInstr;       // Number of local instructions
     unsigned int nbInstrChild;  // Number of instructions (including children)
     unsigned int nbRecCalls;    // Number of rec calls (0 -> no recursivity)
-    Func_call* children;        // Children function
+    Func_call* child;           // Child function
     Func_call* next;            // Next function
     unsigned int depth;         // Depth inside the call tree
 };
@@ -47,7 +47,7 @@ struct Profiler_t{
 /*
  * Initializes the profiler.
  * 
- * @param tracee: path to the executable of the tracee.
+ * @param tracee Path to the executable of the tracee.
  * 
  * @return Empty profiling data.
  */
@@ -56,7 +56,7 @@ static Profiler* init_profiler(char* tracee);
 /*
  * Traces the function calls for the given profiler.
  * 
- * @param profiler: the profiler for which we want to
+ * @param profiler Profiler for which we want to
  * trace the function calls.
  */
 static void trace_function_calls(Profiler* profiler);
@@ -74,27 +74,31 @@ static Func_call* func_call_create_node(void);
  * @param new Node to be set.
  * @param prev Link to parent of new node.
  * @param newDepth Depth of the new node.
- * @param Symbol of function of new node.
+ * @param symbol Symbol of function represented by the new node.
  */
-static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char* symbol);
+static void func_call_set(
+    Func_call* new,
+    Func_call* prev,
+    unsigned int newDepth,
+    char* symbol
+);
 
 /*
- * Frees the memory aasociated to a Func_call.
+ * Frees the memory associated to the function calls.
  * 
- * @param fc Func_call to free.
+ * @param fc Beginning of the call tree.
  */
 static void func_call_free(Func_call* fc);
 
 /*
  * Prints the function calls as in the brief.
  * 
- * @param fc Start of the function calls.
+ * @param fc Beginning of the call tree.
  */
 static void func_call_print(Func_call* fc);
 
 /*
- * Prints a function as in the brief (function's name and
- * number of instructions including children).
+ * Prints an unique function as in the brief.
  * 
  * @param fc Function to print.
  */
@@ -103,21 +107,32 @@ static void func_call_print_unique(Func_call* fc);
 /*
  * Rebuilds depths inside the call tree after a recursive function.
  * 
- * @param fc Function in the call tree after the recursive function that we are considering.
+ * @param fc Function in the call tree after the recursive function
+ * that we are considering.
  * @param minDepth Depth of the recursive function in the call tree.
  * @param currentDepth Current depth inside the tree.
  */
-static void rebuild_depth(Func_call* fc, unsigned int minDepth, unsigned int currentDepth);
+static void rebuild_depth(
+    Func_call* fc,
+    unsigned int minDepth,
+    unsigned int currentDepth
+);
 
 /*
  * Rebuilds depths between children functions of a recursive function.
  * 
  * @param prev Name of function before recursive function.
- * @param fc Function in the call tree after the recursive function that we are considering.
+ * @param fc Function in the call tree after the recursive function
+ * that we are considering.
  * @param minDepth Depth of the recursive function in the call tree.
  * @param currentDepth Current depth inside the tree.
  */
-static void rebuild_children_functions(char* prev, Func_call* fc, unsigned int minDepth, unsigned int currentDepth);
+static void rebuild_children_functions(
+    char* prev,
+    Func_call* fc,
+    unsigned int minDepth,
+    unsigned int currentDepth
+);
 
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
@@ -150,12 +165,17 @@ Profiler* run_profiler(char* tracee){
 }
 
 static void trace_function_calls(Profiler* profiler){
-    if(!profiler)
+    if(!profiler){
+        fprintf(stderr, "Profiler issue for tracing the function calls!\n");
         return;
+    }
 
+    // Loads mapping between functions names' and addresses
     FunctionsAddresses* fa = functions_addresses_load(profiler->tracee);
-    if(!fa)
+    if(!fa){
+        fprintf(stderr, "Unable to load the mapping between functions names' and addresses!\n");
         return;
+    }
 
     int status;
     struct user_regs_struct userRegs;
@@ -163,39 +183,48 @@ static void trace_function_calls(Profiler* profiler){
     unsigned long depth = 0, prevDepth, prevLocalDepth = 0, nbCalls = 0, nbRets = 0, comingAddr;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
-    // Used to get opcode on 2 bytes - 2^16-1
+    // Used to get opcode on 2 bytes
     const unsigned long PREFIX2 = 65535;
-    // Used to get opcode on 2 bytes excluding 3d hex digit.
+    // Used to get opcode on 2 bytes excluding 3d hex digit
     const unsigned long PREFIX3 = 61695;
 
+    // Initializing the call tree
     profiler->entryPoint = func_call_create_node();
-    if(!profiler->entryPoint)
+    if(!profiler->entryPoint){
+        fprintf(stderr, "Unable to initialize the call tree for the profiler!\n");
+        functions_addresses_clean(fa);
         return;
+    }
     
     Func_call* currNode = profiler->entryPoint;
     char* prevFuncName = calloc(256, sizeof(char));
-    if(!prevFuncName)
+    if(!prevFuncName){
+        fprintf(stderr, "Unable to allocate memory for tracing function calls!\n");
+        functions_addresses_clean(fa);
         return;
+    }
 
     while(true){
+        // Checks if tracee process ended or not
         wait(&status);
         if(WIFEXITED(status))
             break;
 
-        // Get registers
+        // Gets registers
         ptrace(PTRACE_GETREGS, profiler->childPID, NULL, &userRegs);
 
-        // Get instruction - EIP = 32 bits instruction register
+        // Gets instruction - EIP = 32 bits instruction register
         unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, userRegs.eip, NULL);
 
         if(nextIsCallee){
             nbCalls++; // MUST BE REMOVED
+            // Gets symbol of function
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
             char* symbolDeref;
             for(unsigned long i = 0; i < NB_BLANKS * depth; i++)    // MUST BE REMOVED
                 printf(" ");    // MUST BE REMOVED
             if(!symbol){
-                if(nextIsDeref){ // call *0x80...
+                if(nextIsDeref){ // If call *0x80... in assembly
                     symbolDeref = function_address_get_symbol_deref(profiler->tracee, comingAddr);
                     printf("%s | %lu\n", symbolDeref, depth);   // MUST BE REMOVED
                     nextIsDeref = false;
@@ -217,14 +246,14 @@ static void trace_function_calls(Profiler* profiler){
                 }
             }
 
-            // Update structure of the tree
+            // Updates structure of the tree
             Func_call* tmp_next;
-            // Recursive
+            // Recursive function
             if(prevFuncName && depth == prevLocalDepth + 1 && symbol && !strcmp(symbol, prevFuncName)){
                 currNode->nbRecCalls+=1;
                 tmp_next = currNode;
             }else{
-                // Need to update next field.
+                // Needs to update next field.
                 if(depth == currNode->depth || depth == currNode->depth - 1){
                     if(depth == currNode->depth - 1){
                         // Go back until we reach same depth
@@ -233,16 +262,26 @@ static void trace_function_calls(Profiler* profiler){
                     }
 
                     currNode->next = func_call_create_node();
-                    if(!currNode->next)
+                    if(!currNode->next){
+                        fprintf(stderr, "Unable to allocate memory to trace function calls!\n");
+                        functions_addresses_clean(fa);
+                        free(prevFuncName);
                         return;
+                    }
                     tmp_next = currNode->next;
                 }else{
-                    // Need to update children field.
-                    currNode->children = func_call_create_node();
-                    if(!currNode->children)
+                    // Needs to update child field.
+                    currNode->child = func_call_create_node();
+                    if(!currNode->child){
+                        fprintf(stderr, "Unable to allocate memory to trace function calls!\n");
+                        functions_addresses_clean(fa);
+                        free(prevFuncName);
                         return;
-                    tmp_next = currNode->children;
+                    }
+                    tmp_next = currNode->child;
                 }
+
+                // Sets fields of new node (Func_call)
                 if(symbol != NULL){
                     func_call_set(tmp_next, currNode, depth, symbol);
                     strcpy(prevFuncName, symbol);
@@ -263,14 +302,14 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long opcode = instr & PREFIX;
         // Opcode (on 2 bytes) is the last 4 hex digits because ptrace uses big-endian
         unsigned long opcode2 = instr & PREFIX2;
-        // Opcode (on 2 bytes) excluding 3d hex digit.
+        // Opcode (on 2 bytes) excluding 3d hex digit
         unsigned long opcode3 = instr & PREFIX3;
 
         // Opcodes for CALL
         if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff){
             nextIsCallee = true;
-            if(opcode2 == 0x15ff){
-                nextIsDeref = true; // call *0x80...
+            if(opcode2 == 0x15ff){ // If call *0x80... in assembly
+                nextIsDeref = true;
                 comingAddr = userRegs.eip;
             }
         }
@@ -282,7 +321,7 @@ static void trace_function_calls(Profiler* profiler){
                 depth-=1;
         }
 
-        currNode->nbInstr++; // update number of instr
+        currNode->nbInstr++; // Updates number of instructions
 
         // Next instruction
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
@@ -337,11 +376,15 @@ Profiler* init_profiler(char* tracee){
     }
 
     Profiler* profiler = malloc(sizeof(Profiler));
-    if(!profiler)
+    if(!profiler){
+        fprintf(stderr, "Unable to allocate memory for profiler!\n");
         return NULL;
-    size_t strLen = strlen(tracee) + 1;
+    }
+
+    size_t strLen = strlen(tracee) + 1; // + 1 for '\0'
     profiler->tracee = malloc(sizeof(char) * strLen);
     if(!profiler->tracee){
+        fprintf(stderr, "Unable to allocate memory for profiler!\n");
         profiler_clean(profiler);
         return NULL;
     }
@@ -362,7 +405,7 @@ Func_call* func_call_create_node(void){
     node->nbInstr = 0;
     node->nbInstrChild = 0;
     node->nbRecCalls = 0;
-    node->children = NULL;
+    node->child = NULL;
     node->next = NULL;
     node->depth = 0;
     
@@ -378,8 +421,10 @@ void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char*
     if(symbol){
         size_t length = strlen(symbol) + 1;
         new->name = malloc(sizeof(char) * length);
-        if(!new->name)
+        if(!new->name){
+            fprintf(stderr, "Unable to allocate memory for profiler!\n");
             return;
+        }
         strcpy(new->name, symbol);
     }
 
@@ -395,22 +440,20 @@ static void rebuild_depth(Func_call* fc, unsigned int minDepth, unsigned int cur
     else
         fc->depth = currentDepth;
     
-    if(fc->children)
-        rebuild_depth(fc->children, minDepth, currentDepth+1);
+    if(fc->child)
+        rebuild_depth(fc->child, minDepth, currentDepth+1);
 
     if(fc->next)
-        rebuild_depth(fc->children, minDepth, minDepth);
+        rebuild_depth(fc->child, minDepth, minDepth);
 }
 
 static void rebuild_children_functions(char* prev, Func_call*fc, unsigned int minDepth, unsigned int currentDepth){
-
     if(!fc)
         return;
     
     if(fc->depth == minDepth){
         return;
     }else{
-
         bool set = false;
         Func_call* tmp = fc->prev;
         while(tmp != NULL && strcmp(prev, tmp->name)){
@@ -426,8 +469,8 @@ static void rebuild_children_functions(char* prev, Func_call*fc, unsigned int mi
             fc->depth = currentDepth;
     }
     
-    if(fc->children)
-        rebuild_children_functions(prev, fc->children, minDepth, currentDepth+1);
+    if(fc->child)
+        rebuild_children_functions(prev, fc->child, minDepth, currentDepth+1);
     if(fc->next)
         rebuild_children_functions(prev, fc->next, minDepth, minDepth);
 
@@ -441,8 +484,8 @@ void func_call_print(Func_call* fc){
     Func_call* tmp = fc;
     while(tmp != NULL){
         func_call_print_unique(tmp);
-        if(tmp->children)
-            func_call_print(tmp->children);
+        if(tmp->child)
+            func_call_print(tmp->child);
         tmp = tmp->next;
     }
 }
@@ -457,8 +500,8 @@ void func_call_print_unique(Func_call* fc){
     else
         printf("func_call_print_unique: unable to get name!\n");
     if(fc->nbRecCalls != 0){
-        rebuild_depth(fc->children, fc->depth, fc->depth+1);
-        rebuild_children_functions(fc->prev->name, fc->children, fc->depth, fc->depth+1);
+        rebuild_depth(fc->child, fc->depth, fc->depth+1);
+        rebuild_children_functions(fc->prev->name, fc->child, fc->depth, fc->depth+1);
         printf(" [rec call: %u]", fc->nbRecCalls);
     }
         
@@ -477,9 +520,9 @@ void func_call_free(Func_call* fc){
             free(tmp->name);
             tmp->name = NULL;
         }
-        if(tmp->children){
-            func_call_free(tmp->children);
-            tmp->children = NULL;
+        if(tmp->child){
+            func_call_free(tmp->child);
+            tmp->child = NULL;
         }
         Func_call* tmp2 = tmp->next;
         if(tmp){
