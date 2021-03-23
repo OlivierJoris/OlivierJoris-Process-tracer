@@ -14,7 +14,7 @@ static char first_call = 1;
 
 /*
  * Represents a node inside the linked list containing
- * the mappings.
+ * the mapping.
  */
 typedef struct Mapping_t Mapping;
 struct Mapping_t{

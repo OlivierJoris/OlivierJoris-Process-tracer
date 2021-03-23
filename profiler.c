@@ -29,14 +29,13 @@
 typedef struct Func_call_t Func_call;
 struct Func_call_t{
     Func_call* prev;            // Previous called function (parent)
-    unsigned long addr;         // Address of beginning of function call
     char* name;                 // Name of the function
     unsigned int nbInstr;       // Number of local instructions
     unsigned int nbInstrChild;  // Number of instructions (including children)
     unsigned int nbRecCalls;    // Number of rec calls (0 -> no recursivity)
     Func_call* children;        // Children function
     Func_call* next;            // Next function
-    unsigned int depth;         // Depth inside call tree
+    unsigned int depth;         // Depth inside the call tree
 };
 
 struct Profiler_t{
@@ -101,6 +100,25 @@ static void func_call_print(Func_call* fc);
  */
 static void func_call_print_unique(Func_call* fc);
 
+/*
+ * Rebuilds depths inside the call tree after a recursive function.
+ * 
+ * @param fc Function in the call tree after the recursive function that we are considering.
+ * @param minDepth Depth of the recursive function in the call tree.
+ * @param currentDepth Current depth inside the tree.
+ */
+static void rebuild_depth(Func_call* fc, unsigned int minDepth, unsigned int currentDepth);
+
+/*
+ * Rebuilds depths between children functions of a recursive function.
+ * 
+ * @param prev Name of function before recursive function.
+ * @param fc Function in the call tree after the recursive function that we are considering.
+ * @param minDepth Depth of the recursive function in the call tree.
+ * @param currentDepth Current depth inside the tree.
+ */
+static void rebuild_children_functions(char* prev, Func_call* fc, unsigned int minDepth, unsigned int currentDepth);
+
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
     if(!profiler){
@@ -116,7 +134,7 @@ Profiler* run_profiler(char* tracee){
         profiler_clean(profiler);
         return NULL;
     }else if(childPID == 0){
-        // Allows parent to trace the child process.
+        // Allows tracer to trace the child process.
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         char* argv[] = {NULL};
         char* env[] = {NULL};
@@ -166,7 +184,7 @@ static void trace_function_calls(Profiler* profiler){
 
         // Get registers
         ptrace(PTRACE_GETREGS, profiler->childPID, NULL, &userRegs);
-            
+
         // Get instruction - EIP = 32 bits instruction register
         unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, userRegs.eip, NULL);
 
@@ -368,6 +386,54 @@ void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, char*
     return;
 }
 
+static void rebuild_depth(Func_call* fc, unsigned int minDepth, unsigned int currentDepth){
+    if(!fc)
+        return;
+    
+    if(fc->depth == minDepth)
+        return;
+    else
+        fc->depth = currentDepth;
+    
+    if(fc->children)
+        rebuild_depth(fc->children, minDepth, currentDepth+1);
+
+    if(fc->next)
+        rebuild_depth(fc->children, minDepth, minDepth);
+}
+
+static void rebuild_children_functions(char* prev, Func_call*fc, unsigned int minDepth, unsigned int currentDepth){
+
+    if(!fc)
+        return;
+    
+    if(fc->depth == minDepth){
+        return;
+    }else{
+
+        bool set = false;
+        Func_call* tmp = fc->prev;
+        while(tmp != NULL && strcmp(prev, tmp->name)){
+            if(!strcmp(fc->name, tmp->name)){
+                set = true;
+                fc->depth = tmp->depth;
+                break;
+            }
+            tmp = tmp->prev;
+        }
+
+        if(!set)
+            fc->depth = currentDepth;
+    }
+    
+    if(fc->children)
+        rebuild_children_functions(prev, fc->children, minDepth, currentDepth+1);
+    if(fc->next)
+        rebuild_children_functions(prev, fc->next, minDepth, minDepth);
+
+    return;
+}
+
 void func_call_print(Func_call* fc){
     if(!fc)
         return;
@@ -390,8 +456,12 @@ void func_call_print_unique(Func_call* fc){
         printf("%s", fc->name);
     else
         printf("func_call_print_unique: unable to get name!\n");
-    if(fc->nbRecCalls != 0)
+    if(fc->nbRecCalls != 0){
+        rebuild_depth(fc->children, fc->depth, fc->depth+1);
+        rebuild_children_functions(fc->prev->name, fc->children, fc->depth, fc->depth+1);
         printf(" [rec call: %u]", fc->nbRecCalls);
+    }
+        
     printf(": %u | %u | depth = %u\n", fc->nbInstr, fc->nbInstrChild, fc->depth);
 
     return;
