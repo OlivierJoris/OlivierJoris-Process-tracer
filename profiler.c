@@ -141,8 +141,6 @@ Profiler* run_profiler(char* tracee){
         return NULL;
     }
 
-    printf("Tracee path = %s\n", profiler->tracee);
-
     pid_t childPID = fork();
     if(childPID < 0){
         fprintf(stderr, "Failed forking process!\n");
@@ -158,7 +156,6 @@ Profiler* run_profiler(char* tracee){
     }else{
         profiler->childPID = childPID;
         trace_function_calls(profiler);
-        printf("\nTracee finished\n");
     }
 
     return profiler;
@@ -180,7 +177,7 @@ static void trace_function_calls(Profiler* profiler){
     int status;
     struct user_regs_struct userRegs;
     bool nextIsCallee = false, nextIsDeref = false;
-    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, nbCalls = 0, nbRets = 0, comingAddr;
+    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, comingAddr;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes
@@ -217,21 +214,15 @@ static void trace_function_calls(Profiler* profiler){
         unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, userRegs.eip, NULL);
 
         if(nextIsCallee){
-            nbCalls++; // MUST BE REMOVED
             // Gets symbol of function
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
             char* symbolDeref;
-            for(unsigned long i = 0; i < NB_BLANKS * depth; i++)    // MUST BE REMOVED
-                printf(" ");    // MUST BE REMOVED
             if(!symbol){
                 if(nextIsDeref){ // If call *0x80... in assembly
                     symbolDeref = function_address_get_symbol_deref(profiler->tracee, comingAddr);
-                    printf("%s | %lu\n", symbolDeref, depth);   // MUST BE REMOVED
                     nextIsDeref = false;
                 }
             }
-            else
-                printf("%s | %lu\n", symbol, depth);    // MUST BE REMOVED
 
             // Updates number of instructions recursively
             Func_call* tmp_prev = currNode;
@@ -316,7 +307,6 @@ static void trace_function_calls(Profiler* profiler){
 
         // Opcodes for RET
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2){
-            nbRets++; // MUST BE REMOVED
             if(depth > 0)
                 depth-=1;
         }
@@ -342,8 +332,6 @@ static void trace_function_calls(Profiler* profiler){
 
     free(prevFuncName);
 
-    printf("\n\n** Nb calls = %lu | nb rets = %lu **\n", nbCalls, nbRets); // MUST BE REMOVED
-
     functions_addresses_clean(fa);
 
     return;
@@ -361,9 +349,6 @@ void profiler_clean(Profiler* profiler){
 }
 
 void profiler_display_data(Profiler* profiler){
-    // For submit, should respect given format.
-    printf("\n** PROFILER's DATA **\n");
-    printf("Tracee name = %s\n", profiler->tracee);
     if(profiler->entryPoint && profiler->entryPoint->next)
         func_call_print(profiler->entryPoint->next);
     return;
@@ -492,20 +477,20 @@ void func_call_print(Func_call* fc){
 
 void func_call_print_unique(Func_call* fc){
     if(!fc)
-        printf("func_call_print_unique: null ptr!");
+        return;
     for(unsigned int i = 0; i < NB_BLANKS * fc->depth; ++i)
         printf(" ");
     if(fc->name)
         printf("%s", fc->name);
     else
-        printf("func_call_print_unique: unable to get name!\n");
+        printf("(null)\n");
     if(fc->nbRecCalls != 0){
         rebuild_depth(fc->child, fc->depth, fc->depth+1);
         rebuild_children_functions(fc->prev->name, fc->child, fc->depth, fc->depth+1);
         printf(" [rec call: %u]", fc->nbRecCalls);
     }
         
-    printf(": %u | %u | depth = %u\n", fc->nbInstr, fc->nbInstrChild, fc->depth);
+    printf(": %u\n", fc->nbInstrChild);
 
     return;
 }
