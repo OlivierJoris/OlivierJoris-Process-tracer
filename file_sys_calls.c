@@ -13,7 +13,7 @@
 #define FILE_NAME "syscall.txt"
 
 // Represents the size of the buffer for reading.
-#define BUFFER_SIZE 50
+#define BUFFER_SIZE 64
 
 struct FileSysCalls_t{
     char** mapping;
@@ -23,12 +23,15 @@ struct FileSysCalls_t{
 FileSysCalls* load_file(void){
 
     FileSysCalls* fsc = malloc(sizeof(FileSysCalls));
-    if(!fsc)
+    if(!fsc){
+        fprintf(stderr, "Unable to allocate memory for loading the mapping!\n");
         return NULL;
+    }
 
     // First, need to know the number of elements
     FILE* f = fopen(FILE_NAME, "r");
     if(!f){
+        fprintf(stderr, "Unable to open the file containing the mapping!\n");
         sys_calls_file_free(fsc);
         return NULL;
     }
@@ -46,15 +49,17 @@ FileSysCalls* load_file(void){
     fsc->nb_elements = (size_t)(max_id + 1);
     fsc->mapping = malloc(sizeof(char*) * fsc->nb_elements);
     if(!fsc->mapping){
+        fprintf(stderr, "Unable to allocate memory for loading the mapping!\n");
         sys_calls_file_free(fsc);
         return NULL;
     }
 
-    //Need to load the data
+    //Needs to load the data
     f = fopen(FILE_NAME, "r");
     while(fscanf(f, "%u %s\n", &curr_id, buffer) != -1){
         fsc->mapping[curr_id] = malloc(sizeof(char) * BUFFER_SIZE);
         if(!fsc->mapping[curr_id]){
+            fprintf(stderr, "Unable to allocate memory for loading the mapping!\n");
             sys_calls_file_free(fsc);
             return NULL;
         }
@@ -93,9 +98,4 @@ char* get_sys_call_name(FileSysCalls* fsc, unsigned int id){
         return NULL;
     else
         return fsc->mapping[id];
-}
-
-/* TESTING PURPOSE ONLY -- NEED TO BE REMOVED BEFORE SUBMIT */
-size_t sys_calls_file_nb_elements(FileSysCalls* fsc){
-    return fsc->nb_elements;
 }

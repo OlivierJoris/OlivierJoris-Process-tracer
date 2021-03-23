@@ -18,7 +18,9 @@
 typedef struct FileSysCalls_t FileSysCalls;
 
 /*
- * Loads the file. Need to call sys_call_file_free() 
+ * Loads the file.
+ * 
+ * @warning Need to call sys_call_file_free()
  * after usage.
  * 
  * @return Pointer to the structure containing the data.
@@ -26,9 +28,9 @@ typedef struct FileSysCalls_t FileSysCalls;
 FileSysCalls* load_file(void);
 
 /*
- * Free the memory associated the file.
+ * Frees the memory associated to the data.
  * 
- * @param fsc: Pointer to the data that need to be freed.
+ * @param fsc Pointer to the data that need to be freed.
  */
 void sys_calls_file_free(FileSysCalls* fsc);
 
@@ -36,15 +38,12 @@ void sys_calls_file_free(FileSysCalls* fsc);
  * Returns the name associated with the system call 
  * which has the given ID.
  * 
- * @param fsc: Pointer to the data.
- * @param id: ID of the system call for which we want
+ * @param fsc Pointer to the data.
+ * @param id ID of the system call for which we want
  * to know the name.
  * 
  * @return The name of the system call with the given ID.
  */
 char* get_sys_call_name(FileSysCalls* fsc, unsigned int id);
-
-/* TESTING PURPOSE ONLY -- NEED TO BE REMOVED BEFORE SUBMIT */
-size_t sys_calls_file_nb_elements(FileSysCalls* fsc);
 
 #endif
