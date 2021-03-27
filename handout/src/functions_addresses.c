@@ -57,7 +57,8 @@ static char* generate_command_objdump(char* exec);
  * 
  * @return A new cell.
  */
-static Mapping* create_new_cell(unsigned long address, unsigned long symbolLength);
+static Mapping* create_new_cell(unsigned long address, 
+                                unsigned long symbolLength);
 
 FunctionsAddresses* functions_addresses_load(char* exec){
     if(!exec){
@@ -82,7 +83,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
 
     char* command = generate_command_nm(exec);
     if(!command){
-        fprintf(stderr, "Unable to generate the command to fetch the mapping!\n");
+        fprintf(stderr, "Unable to generate the command to fetch the "
+                        "mapping!\n");
         functions_addresses_clean(fa);
         return NULL;
     }
@@ -107,7 +109,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         // Builds new line in the file
         current->next = create_new_cell(0, BUFFER_SIZE);
         if(!current->next){
-            fprintf(stderr, "Unable to allocate memory to fetch the mapping!\n");
+            fprintf(stderr, "Unable to allocate memory to fetch the "
+                            "mapping!\n");
             functions_addresses_clean(fa);
             fclose(f);
             return NULL;
@@ -122,7 +125,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
     Mapping* prev = NULL;
     char* command2 = generate_command_objdump(exec);
     if(!command2){
-        fprintf(stderr, "Unable to generate the command to fetch the mapping!\n");
+        fprintf(stderr, "Unable to generate the command to fetch the "
+                        "mapping!\n");
         functions_addresses_clean(fa);
         return NULL;
     }
@@ -149,7 +153,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
             if(prev == NULL && address < current->addr){
                 Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
                 if(!newCell){
-                    fprintf(stderr, "Unable to allocate memory to fetch the mapping!\n");
+                    fprintf(stderr, "Unable to allocate memory to fetch the "
+                                    "mapping!\n");
                     functions_addresses_clean(fa);
                     fclose(f2);
                     return NULL;
@@ -163,10 +168,12 @@ FunctionsAddresses* functions_addresses_load(char* exec){
             }
 
             // New cell in the middle of the list
-            if(prev != NULL && address > prev->addr && address < current->addr){
+            if(prev != NULL && address > prev->addr &&
+               address < current->addr){
                 Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
                 if(!newCell){
-                    fprintf(stderr, "Unable to allocate memory to fetch the mapping!\n");
+                    fprintf(stderr, "Unable to allocate memory to fetch the "
+                                    "mapping!\n");
                     functions_addresses_clean(fa);
                     fclose(f2);
                     return fa;
@@ -188,7 +195,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
     return fa;
 }
 
-static Mapping* create_new_cell(unsigned long address, unsigned long symbolLength){
+static Mapping* create_new_cell(unsigned long address, 
+                                unsigned long symbolLength){
     Mapping* newCell = malloc(sizeof(Mapping));
     if(!newCell)
         return NULL;
@@ -211,7 +219,9 @@ static char* generate_command_nm(char* exec){
     if(!cmd)
         return NULL;
 
-    sprintf(cmd, "nm -a --numeric-sort %s | grep -oE \"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk '{print $1\" \"$3}' > nm.txt", exec);
+    sprintf(cmd, "nm -a --numeric-sort %s | grep -oE "
+                 "\"[0-9a-z]{8}[ ]{1}[a-zA-Z]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk "
+                 "'{print $1\" \"$3}' > nm.txt", exec);
 
     return cmd;
 }
@@ -224,7 +234,9 @@ static char* generate_command_objdump(char* exec){
     if(!cmd)
         return NULL;
     
-    sprintf(cmd, "objdump -d %s | grep -oE \"[0-9a-zA-Z: ]*call[ ]*[0-9a-z ]*<.*>\" | awk '{print $2 \" \"$3}' | sort | uniq > func_names.txt", exec);
+    sprintf(cmd, "objdump -d %s | grep -oE "
+                 "\"[0-9a-zA-Z: ]*call[ ]*[0-9a-z ]*<.*>\" | awk "
+                 "'{print $2 \" \"$3}' | sort | uniq > func_names.txt", exec);
 
     return cmd;
 }
@@ -249,7 +261,8 @@ void functions_addresses_clean(FunctionsAddresses* fa){
     return;
 }
 
-char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr){
+char* functions_addresses_get_symbol(FunctionsAddresses* fa, 
+                                     unsigned long addr){
     if(!fa | !fa->first)
         return NULL;
 
@@ -273,7 +286,9 @@ char* function_address_get_symbol_deref(char* tracee, unsigned long addr){
     }
 
     // Finds intermediate address
-    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%lx.*ff 15.*call.*\" | awk '{print $NF}' | grep -oE \"8.*\" > going_addr.txt", addr);
+    sprintf(buffer, "cat dump_s.txt | grep -oE "
+                    "\".*%lx.*ff 15.*call.*\" | awk "
+                    "'{print $NF}' | grep -oE \"8.*\" > going_addr.txt", addr);
     system(buffer);
 
     FILE* f = fopen("going_addr.txt", "r");
@@ -284,7 +299,9 @@ char* function_address_get_symbol_deref(char* tracee, unsigned long addr){
     fclose(f);
 
     // Finds dest address
-    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%lx [0-9a-z]{8}[ ]{1}\" | awk '{print $2}' > going_addr.txt", goingAddr);
+    sprintf(buffer, "cat dump_s.txt | grep -oE "
+                    "\".*%lx [0-9a-z]{8}[ ]{1}\" | awk "
+                    "'{print $2}' > going_addr.txt", goingAddr);
     system(buffer);
 
     f = fopen("going_addr.txt", "r");
@@ -296,7 +313,8 @@ char* function_address_get_symbol_deref(char* tracee, unsigned long addr){
 
     char* tmp = malloc(sizeof(char) * (strlen(reachedAddr) + 1));
     if(!tmp){
-        fprintf(stderr, "Unable to allocate memory to fetch function's symbol!\n");
+        fprintf(stderr, "Unable to allocate memory to fetch function's "
+                        "symbol!\n");
         return NULL;
     }
     unsigned int i = 0;
@@ -310,7 +328,9 @@ char* function_address_get_symbol_deref(char* tracee, unsigned long addr){
     tmp[i] = '\0';
 
     // Finds name of function
-    sprintf(buffer, "cat dump_s.txt | grep -oE \".*%s.*<.*>\" | awk '{print $2}' | grep -oE \"[^<]{1}.*[^>]{1}\" > func_name.txt", tmp);
+    sprintf(buffer, "cat dump_s.txt | grep -oE "
+                    "\".*%s.*<.*>\" | awk '{print $2}' | grep -oE "
+                    "\"[^<]{1}.*[^>]{1}\" > func_name.txt", tmp);
     system(buffer);
     free(tmp);
 

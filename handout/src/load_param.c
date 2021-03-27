@@ -12,12 +12,14 @@
 
 Mode load_arguments(int argc, char **argv){
     if(argc != 3){
-        fprintf(stderr, "Please launch this program with ./tracer <mode> <prog>\n");
+        fprintf(stderr, "Please launch this program with ./tracer "
+                        "<mode> <prog>\n");
         return error;
     }
 
     if(!strcmp(argv[1], "-p"))
         return profiler;
+        
     else{
         if(!strcmp(argv[1], "-s"))
             return syscall;

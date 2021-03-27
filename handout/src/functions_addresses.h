@@ -43,7 +43,8 @@ void functions_addresses_clean(FunctionsAddresses* fa);
  * 
  * @return Symbol associated to the given address.
  */
-char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr);
+char* functions_addresses_get_symbol(FunctionsAddresses* fa, 
+                                     unsigned long addr);
 
 /*
  * Gets the symbol associated to the function called by assembly: call *0x80....
@@ -53,6 +54,7 @@ char* functions_addresses_get_symbol(FunctionsAddresses* fa, unsigned long addr)
  * 
  * @return Symbol of called function.
  */
-char* function_address_get_symbol_deref(char* tracee, unsigned long addr);
+char* function_address_get_symbol_deref(char* tracee, 
+                                        unsigned long addr);
 
 #endif
