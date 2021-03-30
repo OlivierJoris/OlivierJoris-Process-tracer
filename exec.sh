@@ -9,7 +9,7 @@ gcc tracee2.S -g -o tracee --static -nostdlib -Wl,-entry="main"
 ./tracer -p tracee
 
 echo -e "\n** tracee1.c **\n"
-gcc --static -g -o tracee tracee1.c
+gcc --static -g -o tracee tracee.c
 ./tracer -p tracee
 
 echo -e "\n** tracee2.c **\n"
