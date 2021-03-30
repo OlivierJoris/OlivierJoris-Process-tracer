@@ -177,14 +177,12 @@ static void trace_function_calls(Profiler* profiler){
 
     int status;
     struct user_regs_struct userRegs;
-    bool nextIsCallee = false, nextIsDeref = false;
-    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, comingAddr;
+    bool nextIsCallee = false;
+    unsigned long depth = 0, prevDepth, prevLocalDepth = 0;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes
     const unsigned long PREFIX2 = 65535;
-    // Used to get opcode on 2 bytes excluding 3d hex digit
-    const unsigned long PREFIX3 = 61695;
 
     // Initializing the call tree
     profiler->entryPoint = func_call_create_node();
@@ -213,20 +211,14 @@ static void trace_function_calls(Profiler* profiler){
         // Gets registers
         ptrace(PTRACE_GETREGS, profiler->childPID, NULL, &userRegs);
 
-        // Gets instruction - EIP = 32 bits instruction register
-        unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, 
-                                     userRegs.eip, NULL);
-
         if(nextIsCallee){
             // Gets symbol of function
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
-            char* symbolDeref;
             if(!symbol){
-                if(nextIsDeref){ // If call *0x80... in assembly
-                    symbolDeref = function_address_get_symbol_deref
-                                  (profiler->tracee, comingAddr);
-                    nextIsDeref = false;
-                }
+                fprintf(stderr, "Error while fetching function's name!\n");
+                functions_addresses_clean(fa);
+                free(prevFuncName);
+                return;
             }
 
             // Updates number of instructions recursively
@@ -285,11 +277,10 @@ static void trace_function_calls(Profiler* profiler){
                     func_call_set(tmp_next, currNode, depth, symbol);
                     strcpy(prevFuncName, symbol);
                 }else{
-                    func_call_set(tmp_next, currNode, depth, symbolDeref);
-                    strcpy(prevFuncName, symbolDeref);
-                    free(symbolDeref);
-                    symbolDeref = NULL;
+                    func_call_set(tmp_next, currNode, depth, "not found\0");
+                    strcpy(prevFuncName, "not found\0");
                 }
+                    
             }
             prevLocalDepth = depth;
             currNode = tmp_next;
@@ -297,22 +288,18 @@ static void trace_function_calls(Profiler* profiler){
             depth+=1;
         }
 
+        // Gets instruction - EIP = 32 bits instruction register
+        unsigned long instr = ptrace(PTRACE_PEEKTEXT, profiler->childPID, 
+                                     userRegs.eip, NULL);
+
         // Opcode (on 1 byte) is the last 2 hex digits because ptrace uses big-endian
         unsigned long opcode = instr & PREFIX;
         // Opcode (on 2 bytes) is the last 4 hex digits because ptrace uses big-endian
         unsigned long opcode2 = instr & PREFIX2;
-        // Opcode (on 2 bytes) excluding 3d hex digit
-        unsigned long opcode3 = instr & PREFIX3;
 
         // Opcodes for CALL
-        if(opcode == 0xe8 || opcode == 0x9a || opcode3 == 0xd0ff || 
-           opcode3 == 0x10ff || opcode3 == 0x50ff || opcode3 == 0x90ff){
+        if(opcode == 0xe8)
             nextIsCallee = true;
-            if(opcode2 == 0x15ff){ // If call *0x80... in assembly
-                nextIsDeref = true;
-                comingAddr = userRegs.eip;
-            }
-        }
 
         // Opcodes for RET
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || 
