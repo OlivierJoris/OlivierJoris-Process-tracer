@@ -16,13 +16,13 @@
  */
 typedef struct Mapping_t Mapping;
 struct Mapping_t{
-    unsigned long addr;
-    char* symbol;
-    Mapping* next;
+    unsigned long addr; // Entry point of the function
+    char* symbol;       // Symbol associated to the function
+    Mapping* next;      // Next mapping in the list
 };
 
 struct FunctionsAddresses_t {
-    Mapping* first;
+    Mapping* first;     // Pointer to the beginning of the list
 };
 
 /*
@@ -31,6 +31,8 @@ struct FunctionsAddresses_t {
  * 
  * @param exec Path to the executable for which we want the
  * mapping.
+ *
+ * @warning Requires nm to be available.
  * 
  * @return The command to be executed.
  */
@@ -40,7 +42,10 @@ static char* generate_command_nm(char* exec);
  * Generates the command (to retreive the mapping) between
  * functions' addresses and symbols.
  * 
- * @param exec Path to the executable for which we want the mapping.
+ * @param exec Path to the executable for which we want the
+ * mapping.
+ *
+ * @warning Requires objdump to be available.
  * 
  * @return The command to be executed.
  */
@@ -78,6 +83,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
+    // Get functions' names based on nm.
+
     char* command = generate_command_nm(exec);
     if(!command){
         fprintf(stderr, "Unable to generate the command to fetch the "
@@ -103,7 +110,7 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         current->addr = address;
         strcpy(current->symbol, buffer);
 
-        // Builds new line in the file
+        // Builds new cell in the list
         current->next = create_new_cell(0, BUFFER_SIZE);
         if(!current->next){
             fprintf(stderr, "Unable to allocate memory to fetch the "
@@ -118,8 +125,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
 
     fclose(f);
 
-    current = fa->first;
-    Mapping* prev = NULL;
+    // Get functions' names based on objdump.
+
     char* command2 = generate_command_objdump(exec);
     if(!command2){
         fprintf(stderr, "Unable to generate the command to fetch the "
@@ -138,16 +145,18 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
+    current = fa->first;
+    Mapping* prev = NULL;
     while(fscanf(f2, "%lx %s\n", &address, buffer) != -1){
         current = fa->first;
         prev = NULL;
-        while(current != NULL){
+        while(current){
             // Already have the mapping in memory
             if(current->addr == address)
                 break;
 
             // New cell at the beginning of the list
-            if(prev == NULL && address < current->addr){
+            if(!prev && address < current->addr){
                 Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
                 if(!newCell){
                     fprintf(stderr, "Unable to allocate memory to fetch the "
@@ -165,7 +174,7 @@ FunctionsAddresses* functions_addresses_load(char* exec){
             }
 
             // New cell in the middle of the list
-            if(prev != NULL && address > prev->addr &&
+            if(prev && address > prev->addr &&
                address < current->addr){
                 Mapping* newCell = create_new_cell(address, BUFFER_SIZE);
                 if(!newCell){
@@ -227,7 +236,7 @@ static char* generate_command_objdump(char* exec){
     if(!exec)
         return NULL;
     
-    char* cmd = calloc(512, sizeof(char));
+    char* cmd = calloc(256, sizeof(char));
     if(!cmd)
         return NULL;
     
@@ -245,7 +254,7 @@ void functions_addresses_clean(FunctionsAddresses* fa){
     Mapping* tmp = fa->first;
     Mapping* next;
 
-    while(tmp != NULL){
+    while(tmp){
         next = tmp->next;
         if(tmp->symbol)
             free(tmp->symbol);
@@ -260,12 +269,12 @@ void functions_addresses_clean(FunctionsAddresses* fa){
 
 char* functions_addresses_get_symbol(FunctionsAddresses* fa, 
                                      unsigned long addr){
-    if(!fa | !fa->first)
+    if(!fa || !fa->first)
         return NULL;
 
     Mapping* mapping = fa->first;
-    while(mapping != NULL){
-        if(mapping->symbol != NULL && mapping->addr == addr)
+    while(mapping){
+        if(mapping->symbol && mapping->addr == addr)
             return mapping->symbol;
         mapping = mapping->next;
     }

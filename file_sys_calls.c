@@ -17,8 +17,8 @@
 #define BUFFER_SIZE 64
 
 struct FileSysCalls_t{
-    char** mapping;
-    size_t nb_elements;
+    char** mapping;         // Array of string containing the mapping
+    size_t nb_elements;     // Number of elements in the array mapping
 };
 
 FileSysCalls* load_file(void){

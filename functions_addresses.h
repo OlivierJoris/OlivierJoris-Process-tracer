@@ -1,5 +1,5 @@
 /*
- * Interface to get mapping between functions' symbols and
+ * Interface to get the mapping between functions' symbols and
  * addresses.
  * 
  * @warning Requires nm & objdump to be available.
