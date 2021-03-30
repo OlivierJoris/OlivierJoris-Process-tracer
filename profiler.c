@@ -364,7 +364,7 @@ void profiler_display_data(Profiler* profiler){
     return;
 }
 
-Profiler* init_profiler(char* tracee){
+static Profiler* init_profiler(char* tracee){
    if(!tracee){
         fprintf(stderr, "Error given tracee!\n");
         return NULL;
@@ -390,7 +390,7 @@ Profiler* init_profiler(char* tracee){
     return profiler;
 }
 
-Func_call* func_call_create_node(void){
+static Func_call* func_call_create_node(void){
     Func_call* node = malloc(sizeof(Func_call));
     if(!node)
         return NULL;
@@ -407,7 +407,7 @@ Func_call* func_call_create_node(void){
     return node;
 }
 
-void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, 
+static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth, 
                    char* symbol, unsigned long prevEIP){
     if(!new)
         return;
@@ -477,7 +477,7 @@ static void rebuild_children_functions(char* prev, Func_call*fc,
     return;
 }
 
-void func_call_print(Func_call* fc){
+static void func_call_print(Func_call* fc){
     if(!fc)
         return;
     
@@ -490,7 +490,7 @@ void func_call_print(Func_call* fc){
     }
 }
 
-void func_call_print_unique(Func_call* fc){
+static void func_call_print_unique(Func_call* fc){
     if(!fc)
         return;
     for(unsigned int i = 0; i < NB_BLANKS * fc->depth; ++i)
@@ -511,7 +511,7 @@ void func_call_print_unique(Func_call* fc){
     return;
 }
 
-void func_call_free(Func_call* fc){
+static void func_call_free(Func_call* fc){
     if(!fc)
         return;
 
