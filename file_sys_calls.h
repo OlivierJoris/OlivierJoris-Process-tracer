@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 /* 
- * Represents the file containing mapping between
+ * Represents the file containing the mapping between
  * system calls' ids and names.
  */
 typedef struct FileSysCalls_t FileSysCalls;

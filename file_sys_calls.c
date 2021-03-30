@@ -30,7 +30,7 @@ FileSysCalls* load_file(void){
         return NULL;
     }
 
-    // First, need to know the number of elements
+    // First, needs to know the number of elements
     FILE* f = fopen(FILE_NAME, "r");
     if(!f){
         fprintf(stderr, "Unable to open the file containing the mapping!\n");
@@ -65,6 +65,7 @@ FileSysCalls* load_file(void){
             fprintf(stderr, "Unable to allocate memory for loading the "
                             "mapping!\n");
             sys_calls_file_free(fsc);
+            fclose(f);
             return NULL;
         }
         strcpy(fsc->mapping[curr_id], buffer);
