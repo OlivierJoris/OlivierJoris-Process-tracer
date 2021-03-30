@@ -101,7 +101,7 @@
 \end{itemize}
 
 \subsection{Data structures}
-\paragraph{}Throughout the project, we used multiple data structures. Here is a list of the data structure that we are using:
+\paragraph{}Throughout the project, we used multiple data structures. Here is a list of the data structure that we are using \footnote{The explanations of the different fields are available in the source files}:
 \begin{itemize}
 	\item In \texttt{profiler\{.c,.h\}}, we have:
 		\begin{itemize}
@@ -120,7 +120,7 @@
 \paragraph{}In this section, we will answer to the questions asked in the section 6 of the assignment.
 \begin{enumerate}
 	\item \textbf{What are the opcodes that you have used to detect the \texttt{call} and \texttt{ret} insturctions?}\\
-	To detect the \texttt{call} instruction, we used the opcodes: 0xe8, 0x9a, 0xffd\textit{x}, 0xff1\textit{x}, 0xff5\textit{x}, and 0xff9\textit{x} where \textit{x} is an hexadecimal digit.\\
+	To detect the \texttt{call} instruction, we used the opcode: 0xe8. We are only using this particular opcode because we are only considering the relative calls.\\
 	To detect the \texttt{ret} instruction, we used the opcodes: 0xc2, 0xc3, 0xca, 0xcb, 0xf3c3, and 0xf2c3.
 	\item \textbf{Why are there many functions called before the "real" program and what is/are their purpose(s)?}\\
 	Their purposes are to set everything in order for the process to be runnable (call to \_\_libc\_start\_main) including setting up the thread inside the process (call to\\\_\_pthread\_initialize\_minimal).
