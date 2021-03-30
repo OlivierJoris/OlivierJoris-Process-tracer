@@ -41,7 +41,7 @@ int trace_syscalls(char *tracee, FileSysCalls *fsc){
             char* env[] = {NULL};
 
             ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-            close(1);
+            close(1); // Does not display output of tracee
             return execve(tracee, argv, env);
         }else{
             int status;

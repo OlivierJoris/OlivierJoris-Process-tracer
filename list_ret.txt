@@ -1,9 +1,0 @@
-c2 00 $0x0
-c2 04 $0x4
-c2 08 $0x8
-c2 0c $0xc
-c2 10 $0x10
-c2 14 $0x14
-c3 ret ret
-f2 c3 ret
-f3 c3 ret
