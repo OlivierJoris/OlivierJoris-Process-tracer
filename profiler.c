@@ -434,7 +434,7 @@ static void rebuild_depth(Func_call* fc, unsigned int minDepth,
 static void rebuild_children_functions(char* prev, Func_call*fc, 
                                        unsigned int minDepth, 
                                        unsigned int currentDepth){
-    if(!fc)
+    if(!fc || !prev)
         return;
     
     if(fc->depth == minDepth){
