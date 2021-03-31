@@ -235,10 +235,8 @@ static void trace_function_calls(Profiler* profiler){
             while(tmp){
                 if((unsigned long)userRegs.eip >= tmp->eipBeforeCall+1 && 
                     (unsigned long)userRegs.eip <= tmp->eipBeforeCall+8){
-                        //printf("eip = %lx | beforeCall+1 = %lx | beforeCall+8 = %lx\n", userRegs.eip, tmp->eipBeforeCall+1, tmp->eipBeforeCall+8);
                         depth = tmp->depth;
-                        toBeUpdated = tmp;
-                        //printf("tmp = %s\n", tmp->name);
+                        toBeUpdated = tmp->prev;
                         break;
                 }else
                     toBeUpdated = currNode;
@@ -454,14 +452,11 @@ static void func_call_increase_nb_instr(Func_call* fc){
     unsigned int prevDepth = fc->depth;
     fc->nbInstr++; // Increases current node nb instr
     // Increases inside the rest of the tree
-    //printf("tmp_prev_name = %s\n", tmp_prev->name);
     while(tmp_prev && prevDepth != 0){
-        while(tmp_prev && !(tmp_prev->depth <= prevDepth - 1)){
-            //printf("tmp_prev_name = %s | tmp_prev->depth = %u | prevDepth = %u\n", tmp_prev->name, tmp_prev->depth, prevDepth);
+        while(tmp_prev && !(tmp_prev->depth <= prevDepth - 1))
             tmp_prev = tmp_prev->prev;
-        }
+
         if(tmp_prev){
-            //printf("actualisation: tmp_prev_name = %s\n", tmp_prev->name);
             tmp_prev->nbInstr++;
             prevDepth = tmp_prev->depth;
         }
