@@ -246,7 +246,7 @@ static void trace_function_calls(Profiler* profiler){
                 (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
                 (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
                     // Goes back to previous node
-                    // currNode = currNode->prev;
+                    //currNode = currNode->prev;
                     toBeUpdated = currNode->prev;
             }
 
@@ -338,9 +338,6 @@ static void trace_function_calls(Profiler* profiler){
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || 
            opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2)
                nextIsRet = true;
-        
-        while(toBeUpdated->next)
-            toBeUpdated = toBeUpdated->next;
 
         // Updates number of instructions
         func_call_increase_nb_instr(toBeUpdated);
@@ -374,7 +371,7 @@ void profiler_display_data(Profiler* profiler){
 }
 
 static Profiler* init_profiler(char* tracee){
-    if(!tracee){
+   if(!tracee){
         fprintf(stderr, "Error given tracee!\n");
         return NULL;
     }
@@ -406,7 +403,6 @@ static Func_call* func_call_create_node(void){
 
     node->prev = NULL;
     node->name = NULL;
-    node->eipBeforeCall = 0;
     node->nbInstr = 0;
     node->nbRecCalls = 0;
     node->child = NULL;
@@ -442,7 +438,7 @@ static void func_call_increase_nb_instr(Func_call* fc){
         return;
 
     /*
-     * Updates number of instructions from current node (fc)
+     * Updates number of instructions from current node
      * up to root of the tree.
     */
     Func_call* tmp_prev = fc;
