@@ -445,7 +445,6 @@ static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth
 static void func_call_increase_nb_instr(Func_call* fc){
     if(!fc)
         return;
-    //printf("\n");
 
     /*
      * Updates number of instructions from current node (fc)
@@ -455,10 +454,14 @@ static void func_call_increase_nb_instr(Func_call* fc){
     unsigned int prevDepth = fc->depth;
     fc->nbInstr++; // Increases current node nb instr
     // Increases inside the rest of the tree
-    while(tmp_prev){
-        while(tmp_prev && tmp_prev->depth != prevDepth - 1)
+    //printf("tmp_prev_name = %s\n", tmp_prev->name);
+    while(tmp_prev && prevDepth != 0){
+        while(tmp_prev && !(tmp_prev->depth <= prevDepth - 1)){
+            //printf("tmp_prev_name = %s | tmp_prev->depth = %u | prevDepth = %u\n", tmp_prev->name, tmp_prev->depth, prevDepth);
             tmp_prev = tmp_prev->prev;
+        }
         if(tmp_prev){
+            //printf("actualisation: tmp_prev_name = %s\n", tmp_prev->name);
             tmp_prev->nbInstr++;
             prevDepth = tmp_prev->depth;
         }

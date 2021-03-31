@@ -1,0 +1,34 @@
+
+tracee:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+080480b8 <main>:
+ 80480b8:	b8 04 00 00 00       	mov    $0x4,%eax
+ 80480bd:	50                   	push   %eax
+ 80480be:	e8 0d 00 00 00       	call   80480d0 <rec>
+ 80480c3:	58                   	pop    %eax
+ 80480c4:	b8 01 00 00 00       	mov    $0x1,%eax
+ 80480c9:	bb 00 00 00 00       	mov    $0x0,%ebx
+ 80480ce:	cd 80                	int    $0x80
+
+080480d0 <rec>:
+ 80480d0:	83 f8 00             	cmp    $0x0,%eax
+ 80480d3:	74 08                	je     80480dd <.if_true>
+ 80480d5:	50                   	push   %eax
+ 80480d6:	48                   	dec    %eax
+ 80480d7:	e8 f4 ff ff ff       	call   80480d0 <rec>
+ 80480dc:	58                   	pop    %eax
+
+080480dd <.if_true>:
+ 80480dd:	e8 01 00 00 00       	call   80480e3 <print>
+ 80480e2:	c3                   	ret    
+
+080480e3 <print>:
+ 80480e3:	b8 04 00 00 00       	mov    $0x4,%eax
+ 80480e8:	bb 01 00 00 00       	mov    $0x1,%ebx
+ 80480ed:	b9 fa 90 04 08       	mov    $0x80490fa,%ecx
+ 80480f2:	ba 0c 00 00 00       	mov    $0xc,%edx
+ 80480f7:	cd 80                	int    $0x80
+ 80480f9:	c3                   	ret    
