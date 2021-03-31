@@ -226,7 +226,7 @@ static char* generate_command_nm(char* exec){
         return NULL;
 
     sprintf(cmd, "nm --numeric-sort %s | grep -oE "
-                 "\"[0-9a-z]{8}[ ]{1}[TtVvWw]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk "
+                 "\"[0-9a-z]{8}[ ]{1}[TtvVwW]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk "
                  "'{print $1\" \"$3}' | sort | uniq > nm.txt", exec);
 
     return cmd;

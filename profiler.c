@@ -246,7 +246,7 @@ static void trace_function_calls(Profiler* profiler){
                 (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
                 (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
                     // Goes back to previous node
-                    //currNode = currNode->prev;
+                    // currNode = currNode->prev;
                     toBeUpdated = currNode->prev;
             }
 
@@ -338,6 +338,9 @@ static void trace_function_calls(Profiler* profiler){
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || 
            opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2)
                nextIsRet = true;
+        
+        while(toBeUpdated->next)
+            toBeUpdated = toBeUpdated->next;
 
         // Updates number of instructions
         func_call_increase_nb_instr(toBeUpdated);
