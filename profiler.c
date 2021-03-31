@@ -303,7 +303,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
 
                 // Sets fields of new node (Func_call)
-                if(symbol != NULL){
+                if(symbol){
                     func_call_set(tmp_next, currNode, depth, symbol, prevEIP);
                     strcpy(prevFuncName, symbol);
                 }else{
@@ -479,7 +479,7 @@ static void func_call_print(Func_call* fc){
         return;
     
     Func_call* tmp = fc;
-    while(tmp != NULL){
+    while(tmp){
         func_call_print_unique(tmp);
         if(tmp->child)
             func_call_print(tmp->child);
@@ -511,7 +511,7 @@ static void func_call_free(Func_call* fc){
         return;
 
     Func_call* tmp = fc;
-    while(tmp != NULL){
+    while(tmp){
         if(tmp->name){
             free(tmp->name);
             tmp->name = NULL;
