@@ -172,7 +172,7 @@ static void trace_function_calls(Profiler* profiler){
     int status;
     struct user_regs_struct userRegs;
     bool nextIsCallee = false, nextIsRet = false, reachedEntryPoint = false;
-    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, prevEIP;
+    unsigned long depth = 0, prevDepth = 0, prevEIP;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes
@@ -221,7 +221,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
                 func_call_set(currNode->next, currNode, depth, symbol, userRegs.eip);
                 currNode = currNode->next;
-                prevLocalDepth = depth;
+                prevDepth = depth;
                 depth+=1;
                 reachedEntryPoint = true;
             }
@@ -267,7 +267,7 @@ static void trace_function_calls(Profiler* profiler){
             // Updates structure of the tree
             Func_call* tmp_next;
             // Recursive function
-            if(prevFuncName && depth == prevLocalDepth + 1 && symbol && 
+            if(prevFuncName && depth == prevDepth + 1 && symbol && 
                !strcmp(symbol, prevFuncName)){
                 currNode->nbRecCalls+=1;
                 tmp_next = currNode;
@@ -312,7 +312,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
             }
 
-            prevLocalDepth = depth;
+            prevDepth = depth;
             currNode = tmp_next;
             toBeUpdated = currNode;
             nextIsCallee = false;
