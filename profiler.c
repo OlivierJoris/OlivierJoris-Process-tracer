@@ -128,22 +128,6 @@ static void rebuild_depth(
     unsigned int currentDepth
 );
 
-/*
- * Rebuilds depths between children functions of a recursive function.
- * 
- * @param prev Name of function before recursive function.
- * @param fc Function in the call tree after the recursive function
- * that we are considering.
- * @param minDepth Depth of the recursive function in the call tree.
- * @param currentDepth Current depth inside the tree.
- */
-static void rebuild_children_functions(
-    char* prev,
-    Func_call* fc,
-    unsigned int minDepth,
-    unsigned int currentDepth
-);
-
 Profiler* run_profiler(char* tracee){
     Profiler* profiler = init_profiler(tracee);
     if(!profiler){
@@ -242,7 +226,7 @@ static void trace_function_calls(Profiler* profiler){
                 reachedEntryPoint = true;
             }
         }
-        
+
         // If previous instruction was RET
         if(nextIsRet){
             Func_call* tmp = currNode;
@@ -282,43 +266,50 @@ static void trace_function_calls(Profiler* profiler){
 
             // Updates structure of the tree
             Func_call* tmp_next;
-            // Needs to update next field.
-            if(depth == currNode->depth || depth == currNode->depth - 1){
-                if(depth == currNode->depth - 1){
-                    // Go back until we reach same depth
-                    while(currNode->depth > depth)
-                        currNode = currNode->prev;
+            // Recursive function
+            if(prevFuncName && depth == prevLocalDepth + 1 && symbol && 
+               !strcmp(symbol, prevFuncName)){
+                currNode->nbRecCalls+=1;
+                tmp_next = currNode;
+            }else{
+                // Needs to update next field.
+                if(depth == currNode->depth || depth == currNode->depth - 1){
+                    if(depth == currNode->depth - 1){
+                        // Go back until we reach same depth
+                        while(currNode->depth > depth)
+                            currNode = currNode->prev;
+                    }
+
+                    currNode->next = func_call_create_node();
+                    if(!currNode->next){
+                        fprintf(stderr, "Unable to allocate memory to trace "
+                                        "function calls!\n");
+                        functions_addresses_clean(fa);
+                        free(prevFuncName);
+                        return;
+                    }
+                    tmp_next = currNode->next;
+                }else{
+                    // Needs to update child field.
+                    currNode->child = func_call_create_node();
+                    if(!currNode->child){
+                        fprintf(stderr, "Unable to allocate memory to trace "
+                                        "function calls!\n");
+                        functions_addresses_clean(fa);
+                        free(prevFuncName);
+                        return;
+                    }
+                    tmp_next = currNode->child;
                 }
 
-                currNode->next = func_call_create_node();
-                if(!currNode->next){
-                    fprintf(stderr, "Unable to allocate memory to trace "
-                                    "function calls!\n");
-                    functions_addresses_clean(fa);
-                    free(prevFuncName);
-                    return;
+                // Sets fields of new node (Func_call)
+                if(symbol != NULL){
+                    func_call_set(tmp_next, currNode, depth, symbol, prevEIP);
+                    strcpy(prevFuncName, symbol);
+                }else{
+                    func_call_set(tmp_next, currNode, depth, "not found\0", prevEIP);
+                    strcpy(prevFuncName, "not found\0");
                 }
-                tmp_next = currNode->next;
-            }else{
-                // Needs to update child field.
-                currNode->child = func_call_create_node();
-                if(!currNode->child){
-                    fprintf(stderr, "Unable to allocate memory to trace "
-                                    "function calls!\n");
-                    functions_addresses_clean(fa);
-                    free(prevFuncName);
-                    return;
-                }
-                tmp_next = currNode->child;
-            }
-
-            // Sets fields of new node (Func_call)
-            if(symbol != NULL){
-                func_call_set(tmp_next, currNode, depth, symbol, prevEIP);
-                strcpy(prevFuncName, symbol);
-            }else{
-                func_call_set(tmp_next, currNode, depth, "not found\0", prevEIP);
-                strcpy(prevFuncName, "not found\0");
             }
 
             prevLocalDepth = depth;
@@ -480,39 +471,7 @@ static void rebuild_depth(Func_call* fc, unsigned int minDepth,
         rebuild_depth(fc->child, minDepth, currentDepth+1);
 
     if(fc->next)
-        rebuild_depth(fc->child, minDepth, minDepth);
-}
-
-static void rebuild_children_functions(char* prev, Func_call*fc, 
-                                       unsigned int minDepth, 
-                                       unsigned int currentDepth){
-    if(!fc || !prev)
-        return;
-    
-    if(fc->depth == minDepth){
-        return;
-    }else{
-        bool set = false;
-        Func_call* tmp = fc->prev;
-        while(tmp != NULL && strcmp(prev, tmp->name)){
-            if(!strcmp(fc->name, tmp->name)){
-                set = true;
-                fc->depth = tmp->depth;
-                break;
-            }
-            tmp = tmp->prev;
-        }
-
-        if(!set)
-            fc->depth = currentDepth;
-    }
-    
-    if(fc->child)
-        rebuild_children_functions(prev, fc->child, minDepth, currentDepth+1);
-    if(fc->next)
-        rebuild_children_functions(prev, fc->next, minDepth, minDepth);
-
-    return;
+        rebuild_depth(fc->next, minDepth, currentDepth);
 }
 
 static void func_call_print(Func_call* fc){
@@ -538,12 +497,10 @@ static void func_call_print_unique(Func_call* fc){
     else
         printf("(null)\n");
     if(fc->nbRecCalls != 0){
-        //rebuild_depth(fc->child, fc->depth, fc->depth+1);
-        //rebuild_children_functions(fc->prev->name, fc->child, fc->depth, 
-        //                           fc->depth+1);
+        rebuild_depth(fc->child, fc->depth, fc->depth+1);
         printf(" [rec call: %u]", fc->nbRecCalls);
     }
-        
+
     printf(": %u\n", fc->nbInstr);
 
     return;
