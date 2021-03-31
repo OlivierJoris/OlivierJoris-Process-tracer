@@ -4,7 +4,7 @@ echo -e "\n** tracee1.S **\n"
 gcc tracee.S -g -o tracee --static -nostdlib -Wl,-entry="main"
 ./tracer -p tracee
 
-echo -e "\n** tracee2.s **\n"
+echo -e "\n** tracee2.S **\n"
 gcc tracee2.S -g -o tracee --static -nostdlib -Wl,-entry="main"
 ./tracer -p tracee
 

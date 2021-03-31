@@ -235,21 +235,27 @@ static void trace_function_calls(Profiler* profiler){
             while(tmp){
                 if((unsigned long)userRegs.eip >= tmp->eipBeforeCall+1 && 
                     (unsigned long)userRegs.eip <= tmp->eipBeforeCall+8){
+                        //printf("eip = %lx | beforeCall+1 = %lx | beforeCall+8 = %lx\n", userRegs.eip, tmp->eipBeforeCall+1, tmp->eipBeforeCall+8);
                         depth = tmp->depth;
                         toBeUpdated = tmp;
+                        //printf("tmp = %s\n", tmp->name);
                         break;
                 }else
                     toBeUpdated = currNode;
                 tmp = tmp->prev;
             }
-
-            if(currNode && currNode->prev && strcmp(currNode->name, currNode->prev->name) &&
-                (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
-                (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
-                    // Goes back to previous node
-                    // currNode = currNode->prev;
-                    toBeUpdated = currNode->prev;
+            if(toBeUpdated && toBeUpdated->name && currNode && currNode->name &&
+                !strcmp(toBeUpdated->name, currNode->name)){
+                while(toBeUpdated && toBeUpdated->name &&
+                    !strcmp(toBeUpdated->name, currNode->name))
+                    toBeUpdated = toBeUpdated->prev;
             }
+
+            if(currNode && currNode->prev &&
+                strcmp(currNode->name, currNode->prev->name) &&
+                (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
+                (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8)
+                    toBeUpdated = currNode->prev;
 
             nextIsRet = false;
         }
@@ -341,6 +347,7 @@ static void trace_function_calls(Profiler* profiler){
                nextIsRet = true;
 
         // Updates number of instructions
+        //printf("eip = %lx | toBeUpdated = %s\n", userRegs.eip, toBeUpdated->name);
         func_call_increase_nb_instr(toBeUpdated);
 
         // Next instruction
@@ -438,6 +445,7 @@ static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth
 static void func_call_increase_nb_instr(Func_call* fc){
     if(!fc)
         return;
+    //printf("\n");
 
     /*
      * Updates number of instructions from current node (fc)
