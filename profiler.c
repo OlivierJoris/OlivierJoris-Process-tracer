@@ -345,7 +345,6 @@ static void trace_function_calls(Profiler* profiler){
                nextIsRet = true;
 
         // Updates number of instructions
-        //printf("eip = %lx | toBeUpdated = %s\n", userRegs.eip, toBeUpdated->name);
         func_call_increase_nb_instr(toBeUpdated);
 
         // Next instruction
