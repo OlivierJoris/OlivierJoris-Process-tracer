@@ -371,7 +371,7 @@ void profiler_display_data(Profiler* profiler){
 }
 
 static Profiler* init_profiler(char* tracee){
-   if(!tracee){
+    if(!tracee){
         fprintf(stderr, "Error given tracee!\n");
         return NULL;
     }
@@ -403,6 +403,7 @@ static Func_call* func_call_create_node(void){
 
     node->prev = NULL;
     node->name = NULL;
+    node->eipBeforeCall = 0;
     node->nbInstr = 0;
     node->nbRecCalls = 0;
     node->child = NULL;
@@ -438,7 +439,7 @@ static void func_call_increase_nb_instr(Func_call* fc){
         return;
 
     /*
-     * Updates number of instructions from current node
+     * Updates number of instructions from current node (fc)
      * up to root of the tree.
     */
     Func_call* tmp_prev = fc;
