@@ -221,6 +221,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
                 func_call_set(currNode->next, currNode, depth, symbol, userRegs.eip);
                 currNode = currNode->next;
+                toBeUpdated = currNode;
                 prevDepth = depth;
                 depth+=1;
                 reachedEntryPoint = true;
@@ -235,20 +236,24 @@ static void trace_function_calls(Profiler* profiler){
                 if((unsigned long)userRegs.eip >= tmp->eipBeforeCall+1 && 
                     (unsigned long)userRegs.eip <= tmp->eipBeforeCall+8){
                         depth = tmp->depth;
-                        toBeUpdated = tmp;
+                        toBeUpdated = tmp->prev;
                         break;
                 }else
                     toBeUpdated = currNode;
                 tmp = tmp->prev;
             }
-
-            if(currNode && currNode->prev && strcmp(currNode->name, currNode->prev->name) &&
-                (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
-                (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
-                    // Goes back to previous node
-                    //currNode = currNode->prev;
-                    toBeUpdated = currNode->prev;
+            if(toBeUpdated && toBeUpdated->name && currNode && currNode->name &&
+                !strcmp(toBeUpdated->name, currNode->name)){
+                while(toBeUpdated && toBeUpdated->name &&
+                    !strcmp(toBeUpdated->name, currNode->name))
+                    toBeUpdated = toBeUpdated->prev;
             }
+
+            if(currNode && currNode->prev &&
+                strcmp(currNode->name, currNode->prev->name) &&
+                (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
+                (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8)
+                    toBeUpdated = currNode->prev;
 
             nextIsRet = false;
         }
@@ -371,7 +376,7 @@ void profiler_display_data(Profiler* profiler){
 }
 
 static Profiler* init_profiler(char* tracee){
-   if(!tracee){
+    if(!tracee){
         fprintf(stderr, "Error given tracee!\n");
         return NULL;
     }
@@ -403,6 +408,7 @@ static Func_call* func_call_create_node(void){
 
     node->prev = NULL;
     node->name = NULL;
+    node->eipBeforeCall = 0;
     node->nbInstr = 0;
     node->nbRecCalls = 0;
     node->child = NULL;
@@ -438,16 +444,17 @@ static void func_call_increase_nb_instr(Func_call* fc){
         return;
 
     /*
-     * Updates number of instructions from current node
+     * Updates number of instructions from current node (fc)
      * up to root of the tree.
     */
     Func_call* tmp_prev = fc;
     unsigned int prevDepth = fc->depth;
     fc->nbInstr++; // Increases current node nb instr
     // Increases inside the rest of the tree
-    while(tmp_prev){
-        while(tmp_prev && tmp_prev->depth != prevDepth - 1)
+    while(tmp_prev && prevDepth != 0){
+        while(tmp_prev && !(tmp_prev->depth <= prevDepth - 1))
             tmp_prev = tmp_prev->prev;
+
         if(tmp_prev){
             tmp_prev->nbInstr++;
             prevDepth = tmp_prev->depth;

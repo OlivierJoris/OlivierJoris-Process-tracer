@@ -102,10 +102,15 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         return NULL;
     }
 
-    unsigned long address;
-    char buffer[BUFFER_SIZE];
+    unsigned long addressPrev = 0, address;
+    char buffer[BUFFER_SIZE], typePrev = '\0', type = '\0';
     Mapping* current = fa->first;
-    while(fscanf(f, "%lx %s\n", &address, buffer) != -1){
+    while(fscanf(f, "%lx %c %s\n", &address, &type, buffer) != -1){
+        // Prefer symbol from text than weak symbol
+        if(addressPrev == address &&
+            (type == 'W' || type == 'w') &&
+            (typePrev == 'T' || typePrev == 't'))
+            continue;
         // Saves current line in the file
         current->addr = address;
         strcpy(current->symbol, buffer);
@@ -121,6 +126,8 @@ FunctionsAddresses* functions_addresses_load(char* exec){
         }
         current = current->next;
         current->next = NULL;
+        addressPrev = address;
+        typePrev = type;
     }
 
     fclose(f);
@@ -184,7 +191,14 @@ FunctionsAddresses* functions_addresses_load(char* exec){
                     fclose(f2);
                     return fa;
                 }
-
+                // Remove <>
+                if(buffer[0] == '<' && buffer[strlen(buffer)-1] == '>'){
+                    for(size_t i = 0; i < strlen(buffer) - 1; ++i){
+                        buffer[i] = buffer[i+1];
+                    }
+                    if(strlen(buffer) >= 2)
+                        buffer[strlen(buffer)-2] = '\0';
+                }
                 strcpy(newCell->symbol, buffer);
                 newCell->next = prev->next;
                 prev->next = newCell;
@@ -227,7 +241,7 @@ static char* generate_command_nm(char* exec){
 
     sprintf(cmd, "nm --numeric-sort %s | grep -oE "
                  "\"[0-9a-z]{8}[ ]{1}[TtVvWw]{1}[ ]{1}[A-Za-z0-9_.]*\" | awk "
-                 "'{print $1\" \"$3}' | sort | uniq > nm.txt", exec);
+                 "'{print $1\" \"$2\" \"$3}' | sort | uniq > nm.txt", exec);
 
     return cmd;
 }
