@@ -205,6 +205,7 @@ static void trace_function_calls(Profiler* profiler){
     profiler->entryPoint->eipBeforeCall = 0;
     
     Func_call* currNode = profiler->entryPoint;
+    Func_call* toBeUpdated = currNode;
 
     char* prevFuncName = calloc(256, sizeof(char));
     if(!prevFuncName){
@@ -250,18 +251,21 @@ static void trace_function_calls(Profiler* profiler){
                 if((unsigned long)userRegs.eip >= tmp->eipBeforeCall+1 && 
                     (unsigned long)userRegs.eip <= tmp->eipBeforeCall+8){
                         depth = tmp->depth;
+                        toBeUpdated = tmp;
                         break;
-                }
+                }else
+                    toBeUpdated = currNode;
                 tmp = tmp->prev;
             }
-            /*
+
             if(currNode && currNode->prev && strcmp(currNode->name, currNode->prev->name) &&
                 (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
                 (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
                     // Goes back to previous node
-                    currNode = currNode->prev;
+                    //currNode = currNode->prev;
+                    toBeUpdated = currNode->prev;
             }
-            */
+
             nextIsRet = false;
         }
 
@@ -319,6 +323,7 @@ static void trace_function_calls(Profiler* profiler){
 
             prevLocalDepth = depth;
             currNode = tmp_next;
+            toBeUpdated = currNode;
             nextIsCallee = false;
             depth+=1;
         }
@@ -344,7 +349,7 @@ static void trace_function_calls(Profiler* profiler){
                nextIsRet = true;
 
         // Updates number of instructions
-        func_call_increase_nb_instr(currNode);
+        func_call_increase_nb_instr(toBeUpdated);
 
         // Next instruction
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
