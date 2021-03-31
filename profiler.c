@@ -254,12 +254,14 @@ static void trace_function_calls(Profiler* profiler){
                 }
                 tmp = tmp->prev;
             }
+            /*
             if(currNode && currNode->prev && strcmp(currNode->name, currNode->prev->name) &&
                 (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
                 (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
                     // Goes back to previous node
                     currNode = currNode->prev;
             }
+            */
             nextIsRet = false;
         }
 
