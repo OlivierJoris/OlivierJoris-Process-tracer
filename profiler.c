@@ -181,14 +181,13 @@ static void trace_function_calls(Profiler* profiler){
 
     int status;
     struct user_regs_struct userRegs;
-    bool nextIsCallee = false, nextIsRet = false;
+    bool nextIsCallee = false, nextIsRet = false, reachedEntryPoint = false;
     unsigned long depth = 0, prevDepth, prevLocalDepth = 0;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes
     const unsigned long PREFIX2 = 65535;
     unsigned long prevEIP;
-    unsigned long nbCalls = 0, nbRets = 0;
 
     // Initializing the call tree
     profiler->entryPoint = func_call_create_node();
@@ -216,6 +215,26 @@ static void trace_function_calls(Profiler* profiler){
 
         // Gets registers
         ptrace(PTRACE_GETREGS, profiler->childPID, NULL, &userRegs);
+
+        // Detects entry point
+        if(!reachedEntryPoint){
+            char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
+            if(symbol && (!strcmp(symbol, "main\0") || !strcmp(symbol, "_start\0"))){
+                currNode->next = func_call_create_node();
+                if(!currNode->next){
+                    fprintf(stderr, "Unable to allocate memory to trace "
+                                                "function calls!\n");
+                    functions_addresses_clean(fa);
+                    return;
+                }
+                func_call_set(currNode->next, currNode, depth, symbol, userRegs.eip);
+                currNode = currNode->next;
+                prevLocalDepth = depth;
+                depth+=1;
+                reachedEntryPoint = true;
+            }
+        }
+        
 
         if(nextIsRet){
             Func_call* tmp = currNode;
@@ -293,7 +312,7 @@ static void trace_function_calls(Profiler* profiler){
                 func_call_set(tmp_next, currNode, depth, "not found\0", prevEIP);
                 strcpy(prevFuncName, "not found\0");
             }
-                    
+
             
             prevLocalDepth = depth;
             currNode = tmp_next;
