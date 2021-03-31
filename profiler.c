@@ -32,8 +32,7 @@ struct Func_call_t{
     unsigned long addrEntry;        // Address of entry point of function
     unsigned long eipBeforeCall;    // EIP before calling this function
     char* name;                     // Name of the function
-    unsigned int nbInstr;           // Number of local instructions
-    unsigned int nbInstrChild;      // Number of instructions (including children)
+    unsigned int nbInstr;           // Number of instructions (including from children)
     unsigned int nbRecCalls;        // Number of rec calls (0 -> no recursivity)
     Func_call* child;               // Child function
     Func_call* next;                // Next function
@@ -86,6 +85,9 @@ static void func_call_set(
     char* symbol,
     unsigned long prevEIP
 );
+
+// TO COMMENT
+static void func_call_increase_nb_instr(Func_call* fc);
 
 /*
  * Frees the memory associated to the function calls.
@@ -182,12 +184,11 @@ static void trace_function_calls(Profiler* profiler){
     int status;
     struct user_regs_struct userRegs;
     bool nextIsCallee = false, nextIsRet = false, reachedEntryPoint = false;
-    unsigned long depth = 0, prevDepth, prevLocalDepth = 0;
+    unsigned long depth = 0, prevDepth, prevLocalDepth = 0, prevEIP;
     // Used to get opcode on 1 byte
     const unsigned long PREFIX = 255;
     // Used to get opcode on 2 bytes
     const unsigned long PREFIX2 = 65535;
-    unsigned long prevEIP;
 
     // Initializing the call tree
     profiler->entryPoint = func_call_create_node();
@@ -235,9 +236,10 @@ static void trace_function_calls(Profiler* profiler){
             }
         }
         
-
+        // If previous instruction was RET
         if(nextIsRet){
             Func_call* tmp = currNode;
+            // Needs to find new depth
             while(tmp){
                 if((unsigned long)userRegs.eip >= tmp->eipBeforeCall+1 && 
                     (unsigned long)userRegs.eip <= tmp->eipBeforeCall+8){
@@ -246,9 +248,16 @@ static void trace_function_calls(Profiler* profiler){
                 }
                 tmp = tmp->prev;
             }
+            if(currNode && currNode->prev && strcmp(currNode->name, currNode->prev->name) &&
+                (unsigned long)userRegs.eip >= currNode->prev->eipBeforeCall+1 &&
+                (unsigned long)userRegs.eip <= currNode->prev->eipBeforeCall+8){
+                    // Goes back to previous node
+                    currNode = currNode->prev;
+            }
             nextIsRet = false;
         }
 
+        // If previous instruction was CALL
         if(nextIsCallee){
             // Gets symbol of function
             char* symbol = functions_addresses_get_symbol(fa, userRegs.eip);
@@ -257,19 +266,6 @@ static void trace_function_calls(Profiler* profiler){
                 functions_addresses_clean(fa);
                 free(prevFuncName);
                 return;
-            }
-
-            // Updates number of instructions recursively
-            Func_call* tmp_prev = currNode;
-            prevDepth = currNode->depth;
-            currNode->nbInstrChild = currNode->nbInstr;
-            while(tmp_prev != NULL){
-                while(tmp_prev != NULL && tmp_prev->depth != prevDepth - 1)
-                    tmp_prev = tmp_prev->prev;
-                if(tmp_prev != NULL){
-                    tmp_prev->nbInstrChild+=currNode->nbInstr;
-                    prevDepth = tmp_prev->depth;
-                }
             }
 
             // Updates structure of the tree
@@ -313,7 +309,6 @@ static void trace_function_calls(Profiler* profiler){
                 strcpy(prevFuncName, "not found\0");
             }
 
-            
             prevLocalDepth = depth;
             currNode = tmp_next;
             nextIsCallee = false;
@@ -332,7 +327,7 @@ static void trace_function_calls(Profiler* profiler){
         // Opcodes for CALL
         if(opcode == 0xe8){
             nextIsCallee = true;
-            prevEIP = userRegs.eip;
+            prevEIP = userRegs.eip; // address of instruction before call
         }
 
         // Opcodes for RET
@@ -340,23 +335,11 @@ static void trace_function_calls(Profiler* profiler){
            opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2)
                nextIsRet = true;
 
-        currNode->nbInstr++; // Updates number of instructions
+        // Updates number of instructions
+        func_call_increase_nb_instr(currNode);
 
         // Next instruction
         ptrace(PTRACE_SINGLESTEP, profiler->childPID, 0, 0);
-    }
-
-    // Last recursive update to number of instructions
-    Func_call* tmp_prev = currNode;
-    prevDepth = currNode->depth;
-    currNode->nbInstrChild = currNode->nbInstr;
-    while(tmp_prev != NULL){
-        while(tmp_prev != NULL && tmp_prev->depth != prevDepth - 1)
-            tmp_prev = tmp_prev->prev;
-        if(tmp_prev != NULL){
-            tmp_prev->nbInstrChild+=currNode->nbInstr;
-            prevDepth = tmp_prev->depth;
-        }
     }
 
     free(prevFuncName);
@@ -417,7 +400,6 @@ static Func_call* func_call_create_node(void){
     node->prev = NULL;
     node->name = NULL;
     node->nbInstr = 0;
-    node->nbInstrChild = 0;
     node->nbRecCalls = 0;
     node->child = NULL;
     node->next = NULL;
@@ -442,6 +424,30 @@ static void func_call_set(Func_call* new, Func_call* prev, unsigned int newDepth
             return;
         }
         strcpy(new->name, symbol);
+    }
+
+    return;
+}
+
+static void func_call_increase_nb_instr(Func_call* fc){
+    if(!fc)
+        return;
+
+    /*
+     * Updates number of instructions from current node
+     * up to root of the tree.
+    */
+    Func_call* tmp_prev = fc;
+    unsigned int prevDepth = fc->depth;
+    fc->nbInstr++; // Increases current node nb instr
+    // Increases inside the rest of the tree
+    while(tmp_prev){
+        while(tmp_prev && tmp_prev->depth != prevDepth - 1)
+            tmp_prev = tmp_prev->prev;
+        if(tmp_prev){
+            tmp_prev->nbInstr++;
+            prevDepth = tmp_prev->depth;
+        }
     }
 
     return;
@@ -525,7 +531,7 @@ static void func_call_print_unique(Func_call* fc){
         printf(" [rec call: %u]", fc->nbRecCalls);
     }
         
-    printf(": %u\n", fc->nbInstrChild);
+    printf(": %u\n", fc->nbInstr);
 
     return;
 }
