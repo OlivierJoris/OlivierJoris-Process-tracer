@@ -29,7 +29,6 @@
 typedef struct Func_call_t Func_call;
 struct Func_call_t{
     Func_call* prev;                // Previous called function (parent)
-    unsigned long addrEntry;        // Address of entry point of function
     unsigned long eipBeforeCall;    // EIP before calling this function
     char* name;                     // Name of the function
     unsigned int nbInstr;           // Number of instructions (including from children)
@@ -86,7 +85,12 @@ static void func_call_set(
     unsigned long prevEIP
 );
 
-// TO COMMENT
+/*
+ * Increases the number of instructions starting from fc
+ * up to the root of the tree.
+ *
+ * @param fc Node at which to start the increase.
+ */
 static void func_call_increase_nb_instr(Func_call* fc);
 
 /*
@@ -198,8 +202,10 @@ static void trace_function_calls(Profiler* profiler){
         functions_addresses_clean(fa);
         return;
     }
+    profiler->entryPoint->eipBeforeCall = 0;
     
     Func_call* currNode = profiler->entryPoint;
+
     char* prevFuncName = calloc(256, sizeof(char));
     if(!prevFuncName){
         fprintf(stderr, "Unable to allocate memory for tracing function "
