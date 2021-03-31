@@ -221,6 +221,7 @@ static void trace_function_calls(Profiler* profiler){
                 }
                 func_call_set(currNode->next, currNode, depth, symbol, userRegs.eip);
                 currNode = currNode->next;
+                toBeUpdated = currNode;
                 prevDepth = depth;
                 depth+=1;
                 reachedEntryPoint = true;
@@ -338,9 +339,6 @@ static void trace_function_calls(Profiler* profiler){
         if(opcode == 0xc2 || opcode == 0xc3 || opcode == 0xca || 
            opcode == 0xcb || opcode2 == 0xc3f3 || opcode2 == 0xc3f2)
                nextIsRet = true;
-        
-        while(toBeUpdated->next)
-            toBeUpdated = toBeUpdated->next;
 
         // Updates number of instructions
         func_call_increase_nb_instr(toBeUpdated);
