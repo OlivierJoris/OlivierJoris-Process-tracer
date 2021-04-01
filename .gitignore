@@ -4,7 +4,6 @@ nm.txt
 assembly.txt
 result.txt
 addr.txt
-dump*
 out*
 nb_instr*
 *.DS_Store
